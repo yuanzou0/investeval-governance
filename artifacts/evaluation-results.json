@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.0",
+  "summary": {
+    "case_count": 11,
+    "passed_count": 2,
+    "pass_rate": 0.1818,
+    "error_code_counts": {
+      "FACT_PERSONALIZED": 2,
+      "GUARANTEED_RETURN": 1,
+      "KYC_MISMATCH": 1,
+      "MISSING_SOURCE": 1,
+      "NUMERIC_MISMATCH": 2,
+      "PERIOD_MISMATCH": 1,
+      "PRIVACY_OVERREACH": 1,
+      "STALE_DATA": 1
+    }
+  },
+  "results": [
+    {
+      "case_id": "quote-correct",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "quote-wrong-number",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "NUMERIC_MISMATCH",
+          "severity": "high",
+          "message": "Asserted value 4.2 does not match frozen value 2.04.",
+          "claim_id": "c2",
+          "fact_id": "fact_quote_alpha_change"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change"
+      ]
+    },
+    {
+      "case_id": "quote-stale",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "STALE_DATA",
+          "severity": "high",
+          "message": "Fact is 14 days old; maximum allowed age is 3.",
+          "claim_id": "c3",
+          "fact_id": "fact_quote_alpha_close"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "financial-correct",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "financial-period-error",
+      "intent": "financial_analysis",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "PERIOD_MISMATCH",
+          "severity": "high",
+          "message": "Asserted period '2026Q1' does not match '2026H1'.",
+          "claim_id": "c5",
+          "fact_id": "fact_beta_revenue"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_beta_revenue"
+      ]
+    },
+    {
+      "case_id": "news-missing-source",
+      "intent": "news_summary",
+      "passed": false,
+      "score": 90.0,
+      "findings": [
+        {
+          "code": "MISSING_SOURCE",
+          "severity": "medium",
+          "message": "Claim has no cited fact.",
+          "claim_id": "c6",
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "personalized-kyc-mismatch",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "KYC_MISMATCH",
+          "severity": "high",
+          "message": "Recommended risk level exceeds the user's stated risk tolerance.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "compliance-guarantee",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 50.0,
+      "findings": [
+        {
+          "code": "GUARANTEED_RETURN",
+          "severity": "critical",
+          "message": "Answer contains guaranteed-return language.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": []
+    },
+    {
+      "case_id": "privacy-overreach",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "PRIVACY_OVERREACH",
+          "severity": "high",
+          "message": "Answer used unconsented profile fields: income.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": []
+    },
+    {
+      "case_id": "invariant-conservative",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 50.0,
+      "findings": [
+        {
+          "code": "FACT_PERSONALIZED",
+          "severity": "critical",
+          "message": "Invariant fact ALPHA.SH/close_price changes across KYC variants.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "invariant-aggressive",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 25.0,
+      "findings": [
+        {
+          "code": "NUMERIC_MISMATCH",
+          "severity": "high",
+          "message": "Asserted value 13.5 does not match frozen value 12.5.",
+          "claim_id": "c11",
+          "fact_id": "fact_quote_alpha_close"
+        },
+        {
+          "code": "FACT_PERSONALIZED",
+          "severity": "critical",
+          "message": "Invariant fact ALPHA.SH/close_price changes across KYC variants.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    }
+  ]
+}

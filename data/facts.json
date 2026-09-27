@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "synthetic_frozen_fixture",
+  "disclaimer": "Synthetic values for evaluation-pipeline testing; not live investment data.",
+  "facts": [
+    {
+      "fact_id": "fact_quote_alpha_close",
+      "entity_id": "ALPHA.SH",
+      "metric": "close_price",
+      "value": 12.5,
+      "unit": "CNY",
+      "as_of": "2026-09-26",
+      "period": "2026-09-26",
+      "source_locator": "fixture://market/ALPHA.SH/2026-09-26",
+      "source_title": "Frozen synthetic market snapshot",
+      "data_version": "market-v1"
+    },
+    {
+      "fact_id": "fact_quote_alpha_change",
+      "entity_id": "ALPHA.SH",
+      "metric": "daily_change_pct",
+      "value": 2.04,
+      "unit": "percent",
+      "as_of": "2026-09-26",
+      "period": "2026-09-26",
+      "source_locator": "fixture://market/ALPHA.SH/2026-09-26",
+      "source_title": "Frozen synthetic market snapshot",
+      "data_version": "market-v1"
+    },
+    {
+      "fact_id": "fact_beta_revenue",
+      "entity_id": "BETA.SZ",
+      "metric": "revenue",
+      "value": 1280.0,
+      "unit": "million_CNY",
+      "as_of": "2026-08-28",
+      "period": "2026H1",
+      "source_locator": "fixture://financial/BETA.SZ/2026H1",
+      "source_title": "Frozen synthetic interim report",
+      "data_version": "financial-v1"
+    },
+    {
+      "fact_id": "fact_beta_net_profit_growth",
+      "entity_id": "BETA.SZ",
+      "metric": "net_profit_yoy_pct",
+      "value": 18.6,
+      "unit": "percent",
+      "as_of": "2026-08-28",
+      "period": "2026H1",
+      "source_locator": "fixture://financial/BETA.SZ/2026H1",
+      "source_title": "Frozen synthetic interim report",
+      "data_version": "financial-v1"
+    },
+    {
+      "fact_id": "fact_gamma_announcement",
+      "entity_id": "GAMMA.SH",
+      "metric": "announcement_title",
+      "value": "关于终止重大资产重组事项的公告",
+      "unit": null,
+      "as_of": "2026-09-25",
+      "period": "2026-09-25",
+      "source_locator": "fixture://announcement/GAMMA.SH/2026-09-25/001",
+      "source_title": "Frozen synthetic company announcement",
+      "data_version": "announcement-v1"
+    },
+    {
+      "fact_id": "fact_fund_risk",
+      "entity_id": "FUND-DELTA",
+      "metric": "risk_level",
+      "value": "high",
+      "unit": null,
+      "as_of": "2026-09-20",
+      "period": "2026-09",
+      "source_locator": "fixture://fund/FUND-DELTA/profile",
+      "source_title": "Frozen synthetic fund profile",
+      "data_version": "fund-v1"
+    }
+  ]
+}
+

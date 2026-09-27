@@ -1,0 +1,207 @@
+"use strict";
+
+const labels = {
+  market_quote: "行情查询",
+  financial_analysis: "财务分析",
+  news_summary: "公告摘要",
+  personalized_explanation: "个性化解释",
+  NUMERIC_MISMATCH: "数字错误",
+  STALE_DATA: "数据过期",
+  PERIOD_MISMATCH: "报告期错误",
+  MISSING_SOURCE: "缺少来源",
+  UNSUPPORTED_CLAIM: "无证据主张",
+  KYC_MISMATCH: "KYC 失配",
+  FACT_PERSONALIZED: "事实被个性化",
+  GUARANTEED_RETURN: "承诺收益",
+  PRIVACY_OVERREACH: "隐私越界",
+  pending: "待复核",
+  confirmed: "已确认",
+  dismissed: "已驳回",
+  resolved: "已修复"
+};
+
+const state = { cases: [], facts: [], results: [], selectedId: null, imported: [] };
+const $ = (selector) => document.querySelector(selector);
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+  })[character]);
+}
+
+function reviewKey(caseId) { return `investeval-review:${caseId}`; }
+function getReview(caseId) {
+  try { return JSON.parse(localStorage.getItem(reviewKey(caseId))) || { status: "pending" }; }
+  catch { return { status: "pending" }; }
+}
+function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JSON.stringify(review)); }
+
+async function loadData() {
+  $("#load-status").textContent = "载入中";
+  const [caseResponse, factResponse, resultResponse] = await Promise.all([
+    fetch("data/cases.json", { cache: "no-store" }),
+    fetch("data/facts.json", { cache: "no-store" }),
+    fetch("data/evaluation-results.json", { cache: "no-store" })
+  ]);
+  if (![caseResponse, factResponse, resultResponse].every((response) => response.ok)) {
+    throw new Error("冻结评测数据载入失败");
+  }
+  state.cases = (await caseResponse.json()).cases;
+  state.facts = (await factResponse.json()).facts;
+  state.results = (await resultResponse.json()).results;
+  state.selectedId = null;
+  populateFilters();
+  render();
+  $("#load-status").textContent = `已载入 ${state.cases.length} 条案例`;
+}
+
+function populateFilters() {
+  const intentSelect = $("#intent-filter");
+  const errorSelect = $("#error-filter");
+  const currentIntent = intentSelect.value;
+  const currentError = errorSelect.value;
+  const intents = [...new Set(state.cases.map((item) => item.intent))];
+  const errors = [...new Set(state.results.flatMap((item) => item.findings.map((finding) => finding.code)))];
+  intentSelect.innerHTML = '<option value="all">全部意图</option>' + intents.map((value) => `<option value="${value}">${labels[value] || value}</option>`).join("");
+  errorSelect.innerHTML = '<option value="all">全部问题</option>' + errors.map((value) => `<option value="${value}">${labels[value] || value}</option>`).join("");
+  if (intents.includes(currentIntent)) intentSelect.value = currentIntent;
+  if (errors.includes(currentError)) errorSelect.value = currentError;
+}
+
+function joinedCases() {
+  const resultMap = new Map(state.results.map((result) => [result.case_id, result]));
+  return [...state.cases, ...state.imported].map((item) => ({ ...item, result: resultMap.get(item.case_id) || importedResult(item), review: getReview(item.case_id) }));
+}
+
+function importedResult(item) {
+  const expected = item.expected_error_codes || [];
+  return {
+    case_id: item.case_id,
+    intent: item.intent,
+    passed: expected.length === 0,
+    score: Math.max(0, 100 - expected.length * 25),
+    findings: expected.map((code) => ({ code, severity: "high", message: "导入日志携带的预期问题标签；服务端核验后可更新结论。", fact_id: null })),
+    checked_fact_ids: []
+  };
+}
+
+function filteredCases() {
+  const outcome = $("#outcome-filter").value;
+  const intent = $("#intent-filter").value;
+  const error = $("#error-filter").value;
+  const review = $("#review-filter").value;
+  return joinedCases().filter((item) => {
+    if (outcome === "bad_case" && item.result.passed) return false;
+    if (outcome === "passed" && !item.result.passed) return false;
+    if (intent !== "all" && item.intent !== intent) return false;
+    if (error !== "all" && !item.result.findings.some((finding) => finding.code === error)) return false;
+    return review === "all" || item.review.status === review;
+  }).sort((a, b) => Number(a.result.passed) - Number(b.result.passed) || a.result.score - b.result.score);
+}
+
+function renderMetrics(items) {
+  const passed = items.filter((item) => item.result.passed).length;
+  const pending = items.filter((item) => !item.result.passed && item.review.status === "pending").length;
+  const critical = items.filter((item) => item.result.findings.some((finding) => finding.severity === "critical")).length;
+  const verified = items.filter((item) => item.result.checked_fact_ids.length > 0).length;
+  const average = items.length ? items.reduce((sum, item) => sum + item.result.score, 0) / items.length : 0;
+  $("#pass-rate").textContent = items.length ? `${Math.round(passed / items.length * 100)}%` : "—";
+  $("#pass-count").textContent = `${passed} / ${items.length} 条通过`;
+  $("#average-score").textContent = average.toFixed(1);
+  $("#pending-count").textContent = String(pending);
+  $("#critical-count").textContent = `${critical} 条严重合规风险`;
+  $("#evidence-rate").textContent = items.length ? `${Math.round(verified / items.length * 100)}%` : "—";
+}
+
+function renderTable(items) {
+  const filtered = filteredCases();
+  $("#result-count").textContent = `${filtered.length} 条`;
+  $("#empty-state").hidden = filtered.length > 0;
+  $("#case-table-body").innerHTML = filtered.map((item) => {
+    const firstCode = item.result.findings[0]?.code;
+    const status = item.review.status || "pending";
+    const scoreClass = item.result.score >= 90 ? "high" : item.result.score >= 60 ? "mid" : "low";
+    return `<tr class="case-row ${state.selectedId === item.case_id ? "selected" : ""}" data-case-id="${escapeHtml(item.case_id)}" tabindex="0">
+      <td><span class="case-id">${escapeHtml(item.case_id)}</span><span class="case-question">${escapeHtml(item.question)}</span></td>
+      <td><span class="badge">${escapeHtml(labels[item.intent] || item.intent)}</span></td>
+      <td><span class="badge ${item.result.passed ? "ok" : "error"}">${escapeHtml(item.result.passed ? "通过" : labels[firstCode] || firstCode)}</span></td>
+      <td><span class="score ${scoreClass}">${item.result.score.toFixed(0)}</span></td>
+      <td><span class="badge ${status === "pending" ? "pending" : ""}">${escapeHtml(labels[status] || status)}</span></td>
+    </tr>`;
+  }).join("");
+  document.querySelectorAll(".case-row").forEach((row) => {
+    const open = () => { state.selectedId = row.dataset.caseId; render(); };
+    row.addEventListener("click", open);
+    row.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") open(); });
+  });
+}
+
+function renderDetail(items) {
+  const item = items.find((candidate) => candidate.case_id === state.selectedId);
+  if (!item) {
+    $("#detail-panel").innerHTML = '<div class="detail-empty"><span>⌁</span><strong>选择一个案例</strong><p>查看回答、核验结果和证据血缘。</p></div>';
+    return;
+  }
+  const findings = item.result.findings.length ? item.result.findings.map((finding) => `<div class="finding">
+    <div class="finding-head"><span class="badge error">${escapeHtml(labels[finding.code] || finding.code)}</span><span class="badge">${escapeHtml(finding.severity)}</span></div>
+    <p>${escapeHtml(finding.message)}</p>
+  </div>`).join("") : '<span class="badge ok">未发现确定性问题</span>';
+  const checked = item.result.checked_fact_ids.length ? item.result.checked_fact_ids.join(", ") : "未核验事实";
+  const kyc = item.kyc ? `${item.kyc.risk_level} · ${item.kyc.horizon} · ${item.kyc.experience}` : "无画像";
+  $("#detail-panel").innerHTML = `
+    <div class="detail-header"><div class="detail-title-row"><div><p class="eyebrow">CASE DETAIL</p><h2>${escapeHtml(item.case_id)}</h2></div><span class="score ${item.result.score < 60 ? "low" : "mid"}">${item.result.score.toFixed(0)}</span></div><p>${escapeHtml(labels[item.intent] || item.intent)}</p></div>
+    <section class="detail-section"><h3>用户问题</h3><p>${escapeHtml(item.question)}</p><h3>Agent 回答</h3><div class="answer-block">${escapeHtml(item.answer)}</div></section>
+    <section class="detail-section"><h3>自动评测结果</h3>${findings}</section>
+    <section class="detail-section"><h3>证据与版本血缘</h3><div class="lineage">
+      <div><span>MODEL</span><strong>${escapeHtml(item.model_version)}</strong></div><div><span>PROMPT</span><strong>${escapeHtml(item.prompt_version)}</strong></div>
+      <div><span>DATA</span><strong>${escapeHtml(item.data_version)}</strong></div><div><span>KYC</span><strong>${escapeHtml(kyc)}</strong></div>
+      <div style="grid-column:1/-1"><span>CHECKED FACTS</span><strong>${escapeHtml(checked)}</strong></div>
+    </div></section>
+    <section class="detail-section"><h3>人工复核</h3><form id="review-form" class="review-form">
+      <label>审核人<input name="reviewer" value="${escapeHtml(item.review.reviewer || "审核员-A")}" required></label>
+      <label>复核说明<textarea name="note">${escapeHtml(item.review.note || "")}</textarea></label>
+      <div class="review-actions"><button type="button" class="secondary-button" data-review-status="dismissed">驳回误报</button><button type="button" class="primary-button" data-review-status="confirmed">确认问题</button></div>
+    </form></section>`;
+  document.querySelectorAll("[data-review-status]").forEach((button) => button.addEventListener("click", () => {
+    const form = $("#review-form");
+    if (!form.reportValidity()) return;
+    const formData = new FormData(form);
+    saveReview(item.case_id, { status: button.dataset.reviewStatus, reviewer: formData.get("reviewer"), note: formData.get("note"), updated_at: new Date().toISOString() });
+    showToast(button.dataset.reviewStatus === "confirmed" ? "已确认该 Bad Case" : "已驳回自动评测结论");
+    render();
+  }));
+}
+
+function render() {
+  const items = joinedCases();
+  renderMetrics(items);
+  renderTable(items);
+  renderDetail(items);
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  window.setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+document.querySelectorAll(".filters select").forEach((element) => element.addEventListener("change", render));
+$("#reload-button").addEventListener("click", () => loadData().then(() => showToast("冻结评测已重新载入")).catch((error) => showToast(error.message)));
+$("#case-upload").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const documentData = JSON.parse(await file.text());
+    if (!Array.isArray(documentData.cases) || !documentData.cases.length) throw new Error("文件必须包含非空 cases 数组");
+    const known = new Set(joinedCases().map((item) => item.case_id));
+    const incoming = documentData.cases.filter((item) => item.case_id && !known.has(item.case_id));
+    if (!incoming.length) throw new Error("没有可导入的新案例");
+    state.imported.push(...incoming);
+    populateFilters(); render(); showToast(`已导入 ${incoming.length} 条匿名问答日志`);
+  } catch (error) { showToast(`导入失败：${error.message}`); }
+  event.target.value = "";
+});
+
+loadData().catch((error) => { $("#load-status").textContent = "载入失败"; showToast(error.message); });
+
