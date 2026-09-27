@@ -20,7 +20,7 @@ const labels = {
   resolved: "已修复"
 };
 
-const state = { cases: [], facts: [], results: [], selectedId: null, imported: [] };
+const state = { cases: [], facts: [], results: [], comparison: null, selectedId: null, imported: [] };
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -38,17 +38,19 @@ function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JS
 
 async function loadData() {
   $("#load-status").textContent = "载入中";
-  const [caseResponse, factResponse, resultResponse] = await Promise.all([
+  const [caseResponse, factResponse, resultResponse, comparisonResponse] = await Promise.all([
     fetch("data/cases.json", { cache: "no-store" }),
     fetch("data/facts.json", { cache: "no-store" }),
-    fetch("data/evaluation-results.json", { cache: "no-store" })
+    fetch("data/evaluation-results.json", { cache: "no-store" }),
+    fetch("data/version-comparison.json", { cache: "no-store" })
   ]);
-  if (![caseResponse, factResponse, resultResponse].every((response) => response.ok)) {
+  if (![caseResponse, factResponse, resultResponse, comparisonResponse].every((response) => response.ok)) {
     throw new Error("冻结评测数据载入失败");
   }
   state.cases = (await caseResponse.json()).cases;
   state.facts = (await factResponse.json()).facts;
   state.results = (await resultResponse.json()).results;
+  state.comparison = await comparisonResponse.json();
   state.selectedId = null;
   populateFilters();
   render();
@@ -104,13 +106,41 @@ function renderMetrics(items) {
   const pending = items.filter((item) => !item.result.passed && item.review.status === "pending").length;
   const critical = items.filter((item) => item.result.findings.some((finding) => finding.severity === "critical")).length;
   const verified = items.filter((item) => item.result.checked_fact_ids.length > 0).length;
-  const average = items.length ? items.reduce((sum, item) => sum + item.result.score, 0) / items.length : 0;
   $("#pass-rate").textContent = items.length ? `${Math.round(passed / items.length * 100)}%` : "—";
   $("#pass-count").textContent = `${passed} / ${items.length} 条通过`;
-  $("#average-score").textContent = average.toFixed(1);
   $("#pending-count").textContent = String(pending);
   $("#critical-count").textContent = `${critical} 条严重合规风险`;
   $("#evidence-rate").textContent = items.length ? `${Math.round(verified / items.length * 100)}%` : "—";
+}
+
+function renderComparison() {
+  const comparison = state.comparison;
+  if (!comparison) return;
+  const { baseline, candidate, delta, gates, decision } = comparison;
+  $("#policy-version").textContent = comparison.policy_version;
+  $("#baseline-version").textContent = `${baseline.model_version} · ${baseline.prompt_version} · ${baseline.data_version}`;
+  $("#candidate-version").textContent = `${candidate.model_version} · ${candidate.prompt_version} · ${candidate.data_version}`;
+  $("#baseline-pass").textContent = `${(baseline.pass_rate * 100).toFixed(1)}%`;
+  $("#candidate-pass").textContent = `${(candidate.pass_rate * 100).toFixed(1)}%`;
+  $("#baseline-score").textContent = baseline.average_score.toFixed(1);
+  $("#candidate-score").textContent = candidate.average_score.toFixed(1);
+  $("#baseline-latency").textContent = `${baseline.p95_latency_ms}ms`;
+  $("#candidate-latency").textContent = `${candidate.p95_latency_ms}ms`;
+  $("#pass-delta").textContent = `${delta.pass_rate_pp >= 0 ? "+" : ""}${delta.pass_rate_pp.toFixed(1)}pp`;
+  $("#score-delta").textContent = `${delta.average_score >= 0 ? "+" : ""}${delta.average_score.toFixed(1)}`;
+  $("#gate-count").textContent = `${gates.filter((gate) => gate.passed).length} / ${gates.length} 通过`;
+  $("#gate-list").innerHTML = gates.map((gate) => `<div class="gate-row">
+    <div class="gate-label"><strong>${escapeHtml(gate.label)}</strong><span>${gate.hard_blocker ? "硬性门槛" : "观察指标"}</span></div>
+    <span class="gate-value">${escapeHtml(gate.observed)}</span><span class="gate-value">${escapeHtml(gate.threshold)}</span>
+    <span class="badge gate-result ${gate.passed ? "ok" : "error"}">${gate.passed ? "PASS" : "FAIL"}</span>
+  </div>`).join("");
+  $("#decision-status").textContent = decision.status;
+  $("#decision-title").textContent = decision.status === "HOLD" ? "暂缓上线" : "受限灰度";
+  $("#decision-summary").textContent = decision.summary;
+  const blockingCount = Object.entries(candidate.error_code_counts).filter(([code]) => ["GUARANTEED_RETURN", "KYC_MISMATCH", "FACT_PERSONALIZED", "PRIVACY_OVERREACH", "NUMERIC_MISMATCH", "PERIOD_MISMATCH"].includes(code)).reduce((sum, [, count]) => sum + count, 0);
+  $("#blocking-change").textContent = String(blockingCount);
+  $("#evidence-delta").textContent = `${delta.evidence_coverage_pp >= 0 ? "+" : ""}${delta.evidence_coverage_pp.toFixed(1)}pp`;
+  $("#latency-delta").textContent = `${delta.p95_latency_ms >= 0 ? "+" : ""}${delta.p95_latency_ms}ms`;
 }
 
 function renderTable(items) {
@@ -177,6 +207,7 @@ function render() {
   renderMetrics(items);
   renderTable(items);
   renderDetail(items);
+  renderComparison();
 }
 
 function showToast(message) {
@@ -187,6 +218,11 @@ function showToast(message) {
 }
 
 document.querySelectorAll(".filters select").forEach((element) => element.addEventListener("change", render));
+document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => {
+  document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== button.dataset.view; });
+  document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}));
 $("#reload-button").addEventListener("click", () => loadData().then(() => showToast("冻结评测已重新载入")).catch((error) => showToast(error.message)));
 $("#case-upload").addEventListener("change", async (event) => {
   const file = event.target.files[0];
@@ -204,4 +240,3 @@ $("#case-upload").addEventListener("change", async (event) => {
 });
 
 loadData().catch((error) => { $("#load-status").textContent = "载入失败"; showToast(error.message); });
-

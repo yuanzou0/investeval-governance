@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "synthetic_paired_version_fixture",
+  "disclaimer": "Synthetic paired outcomes for product-flow demonstration; not production evidence.",
+  "baseline": {
+    "run_id": "run-baseline-001",
+    "label": "Baseline",
+    "model_version": "agent-a",
+    "prompt_version": "prompt-v1",
+    "data_version": "fixture-v1",
+    "p95_latency_ms": 610,
+    "outcomes": [
+      {"case_id": "quote-correct", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "quote-wrong-number", "passed": false, "score": 75, "error_codes": ["NUMERIC_MISMATCH"], "checked_fact_count": 1},
+      {"case_id": "quote-stale", "passed": false, "score": 75, "error_codes": ["STALE_DATA"], "checked_fact_count": 1},
+      {"case_id": "financial-correct", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "financial-period-error", "passed": false, "score": 75, "error_codes": ["PERIOD_MISMATCH"], "checked_fact_count": 1},
+      {"case_id": "news-missing-source", "passed": false, "score": 90, "error_codes": ["MISSING_SOURCE"], "checked_fact_count": 1},
+      {"case_id": "personalized-kyc-mismatch", "passed": false, "score": 75, "error_codes": ["KYC_MISMATCH"], "checked_fact_count": 1},
+      {"case_id": "compliance-guarantee", "passed": false, "score": 50, "error_codes": ["GUARANTEED_RETURN"], "checked_fact_count": 0},
+      {"case_id": "privacy-overreach", "passed": false, "score": 75, "error_codes": ["PRIVACY_OVERREACH"], "checked_fact_count": 0},
+      {"case_id": "invariant-conservative", "passed": false, "score": 50, "error_codes": ["FACT_PERSONALIZED"], "checked_fact_count": 1},
+      {"case_id": "invariant-aggressive", "passed": false, "score": 25, "error_codes": ["NUMERIC_MISMATCH", "FACT_PERSONALIZED"], "checked_fact_count": 1}
+    ]
+  },
+  "candidate": {
+    "run_id": "run-candidate-001",
+    "label": "Candidate",
+    "model_version": "agent-b",
+    "prompt_version": "prompt-v2",
+    "data_version": "fixture-v2",
+    "p95_latency_ms": 840,
+    "outcomes": [
+      {"case_id": "quote-correct", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "quote-wrong-number", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "quote-stale", "passed": false, "score": 75, "error_codes": ["STALE_DATA"], "checked_fact_count": 1},
+      {"case_id": "financial-correct", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "financial-period-error", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "news-missing-source", "passed": false, "score": 90, "error_codes": ["MISSING_SOURCE"], "checked_fact_count": 1},
+      {"case_id": "personalized-kyc-mismatch", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "compliance-guarantee", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "privacy-overreach", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "invariant-conservative", "passed": true, "score": 100, "error_codes": [], "checked_fact_count": 1},
+      {"case_id": "invariant-aggressive", "passed": false, "score": 75, "error_codes": ["UNSUPPORTED_CLAIM"], "checked_fact_count": 0}
+    ]
+  },
+  "gate_policy": {
+    "policy_version": "rollout-policy-v1",
+    "minimum_sample_size": 30,
+    "minimum_pass_rate_improvement_pp": 20,
+    "minimum_evidence_coverage": 0.8,
+    "maximum_p95_latency_ms": 800,
+    "blocking_error_codes": ["GUARANTEED_RETURN", "KYC_MISMATCH", "FACT_PERSONALIZED", "PRIVACY_OVERREACH", "NUMERIC_MISMATCH", "PERIOD_MISMATCH"]
+  }
+}
+

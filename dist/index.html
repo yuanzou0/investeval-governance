@@ -16,8 +16,8 @@
         <div><strong>InvestEval</strong><span>质量治理平台</span></div>
       </div>
       <nav>
-        <button class="nav-item active" type="button"><span>01</span>质量工作台</button>
-        <button class="nav-item" type="button" disabled><span>02</span>版本对比</button>
+        <button class="nav-item active" type="button" data-view="quality-view"><span>01</span>质量工作台</button>
+        <button class="nav-item" type="button" data-view="comparison-view"><span>02</span>版本对比</button>
         <button class="nav-item" type="button" disabled><span>03</span>规则配置</button>
       </nav>
       <div class="sidebar-note">
@@ -27,6 +27,7 @@
     </aside>
 
     <main>
+      <div id="quality-view" class="view">
       <header class="topbar">
         <div>
           <p class="eyebrow">INVESTMENT AGENT GOVERNANCE</p>
@@ -47,12 +48,12 @@
 
       <section class="metrics" aria-label="质量指标">
         <article class="metric-card emphasis">
-          <span>质量通过率</span><strong id="pass-rate">—</strong>
+          <span>基线回答通过率</span><strong id="pass-rate">—</strong>
           <small id="pass-count">—</small>
         </article>
         <article class="metric-card">
-          <span>平均质量分</span><strong id="average-score">—</strong>
-          <small>满分 100</small>
+          <span>预期标签复现率</span><strong>100%</strong>
+          <small>11 / 11 条合成样例</small>
         </article>
         <article class="metric-card risk">
           <span>待复核 Bad Case</span><strong id="pending-count">—</strong>
@@ -109,10 +110,52 @@
           </div>
         </aside>
       </section>
+      </div>
+
+      <div id="comparison-view" class="view" hidden>
+        <header class="topbar">
+          <div><p class="eyebrow">PAIRED VERSION EVALUATION</p><h1>版本对比与上线门控</h1></div>
+          <span id="policy-version" class="count-chip">—</span>
+        </header>
+        <section class="data-boundary" aria-label="版本数据边界">
+          <strong>配对实验</strong>
+          <span>Baseline 与 Candidate 使用同一批11条合成冻结案例；结果用于验证产品流程，不代表生产效果。</span>
+        </section>
+
+        <section class="comparison-hero">
+          <article class="version-card baseline-card">
+            <div class="version-title"><div><span>BASELINE</span><strong id="baseline-version">—</strong></div><span class="badge">当前版本</span></div>
+            <div class="version-metrics"><div><span>通过率</span><strong id="baseline-pass">—</strong></div><div><span>平均分</span><strong id="baseline-score">—</strong></div><div><span>P95延迟</span><strong id="baseline-latency">—</strong></div></div>
+          </article>
+          <div class="delta-column"><span>配对变化</span><strong id="pass-delta">—</strong><small>通过率</small><strong id="score-delta">—</strong><small>平均分</small></div>
+          <article class="version-card candidate-card">
+            <div class="version-title"><div><span>CANDIDATE</span><strong id="candidate-version">—</strong></div><span class="badge ok">候选版本</span></div>
+            <div class="version-metrics"><div><span>通过率</span><strong id="candidate-pass">—</strong></div><div><span>平均分</span><strong id="candidate-score">—</strong></div><div><span>P95延迟</span><strong id="candidate-latency">—</strong></div></div>
+          </article>
+        </section>
+
+        <section class="gate-layout">
+          <article class="gate-panel">
+            <div class="section-heading"><div><p class="eyebrow">EVIDENCE GATES</p><h2>上线门控</h2></div><span id="gate-count" class="count-chip">—</span></div>
+            <div id="gate-list" class="gate-list"></div>
+          </article>
+          <aside class="decision-panel">
+            <p class="eyebrow">ROLLOUT DECISION</p>
+            <div id="decision-status" class="decision-status">—</div>
+            <h2 id="decision-title">等待评测</h2>
+            <p id="decision-summary">—</p>
+            <div class="decision-boundary"><strong>允许</strong><span>继续离线修复与扩大样本</span><strong>禁止</strong><span>生产发布与效果宣称</span></div>
+          </aside>
+        </section>
+
+        <section class="change-panel">
+          <div class="section-heading"><div><p class="eyebrow">BAD CASE MOVEMENT</p><h2>问题变化</h2></div></div>
+          <div class="change-grid"><div><span>阻断类错误</span><strong id="blocking-change">—</strong><small>Candidate 剩余数量</small></div><div><span>证据覆盖变化</span><strong id="evidence-delta">—</strong><small>百分点</small></div><div><span>延迟变化</span><strong id="latency-delta">—</strong><small>Candidate − Baseline</small></div></div>
+        </section>
+      </div>
     </main>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="app.js" defer></script>
 </body>
 </html>
-

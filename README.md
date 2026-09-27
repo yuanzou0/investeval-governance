@@ -20,6 +20,9 @@ PYTHONPATH=src python -m investeval.cli evaluate \
 
 # Start the dependency-free governance API
 PYTHONPATH=src python -m investeval.cli serve --port 8000
+
+# Reproduce paired version comparison and rollout decision
+PYTHONPATH=src python -m investeval.cli compare
 ```
 
 ## Governance API

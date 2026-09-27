@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "synthetic_paired_version_fixture",
+  "disclaimer": "Synthetic paired outcomes for product-flow demonstration; not production evidence.",
+  "policy_version": "rollout-policy-v1",
+  "baseline": {
+    "run_id": "run-baseline-001",
+    "label": "Baseline",
+    "model_version": "agent-a",
+    "prompt_version": "prompt-v1",
+    "data_version": "fixture-v1",
+    "sample_size": 11,
+    "passed_count": 2,
+    "pass_rate": 0.1818,
+    "average_score": 71.82,
+    "evidence_coverage": 0.8182,
+    "p95_latency_ms": 610,
+    "error_code_counts": {
+      "FACT_PERSONALIZED": 2,
+      "GUARANTEED_RETURN": 1,
+      "KYC_MISMATCH": 1,
+      "MISSING_SOURCE": 1,
+      "NUMERIC_MISMATCH": 2,
+      "PERIOD_MISMATCH": 1,
+      "PRIVACY_OVERREACH": 1,
+      "STALE_DATA": 1
+    }
+  },
+  "candidate": {
+    "run_id": "run-candidate-001",
+    "label": "Candidate",
+    "model_version": "agent-b",
+    "prompt_version": "prompt-v2",
+    "data_version": "fixture-v2",
+    "sample_size": 11,
+    "passed_count": 8,
+    "pass_rate": 0.7273,
+    "average_score": 94.55,
+    "evidence_coverage": 0.9091,
+    "p95_latency_ms": 840,
+    "error_code_counts": {
+      "MISSING_SOURCE": 1,
+      "STALE_DATA": 1,
+      "UNSUPPORTED_CLAIM": 1
+    }
+  },
+  "delta": {
+    "pass_rate_pp": 54.55,
+    "average_score": 22.73,
+    "evidence_coverage_pp": 9.09,
+    "p95_latency_ms": 230
+  },
+  "gates": [
+    {
+      "gate_id": "paired_sample_size",
+      "label": "配对样本量",
+      "passed": false,
+      "observed": 11,
+      "threshold": ">=30",
+      "hard_blocker": true
+    },
+    {
+      "gate_id": "pass_rate_improvement",
+      "label": "通过率改善",
+      "passed": true,
+      "observed": "+54.5pp",
+      "threshold": ">=20pp",
+      "hard_blocker": false
+    },
+    {
+      "gate_id": "evidence_coverage",
+      "label": "证据核验覆盖",
+      "passed": true,
+      "observed": "90.9%",
+      "threshold": ">=80%",
+      "hard_blocker": true
+    },
+    {
+      "gate_id": "blocking_errors",
+      "label": "阻断类错误",
+      "passed": true,
+      "observed": 0,
+      "threshold": "=0",
+      "hard_blocker": true
+    },
+    {
+      "gate_id": "p95_latency",
+      "label": "P95 延迟",
+      "passed": false,
+      "observed": "840ms",
+      "threshold": "<=800ms",
+      "hard_blocker": true
+    }
+  ],
+  "decision": {
+    "status": "HOLD",
+    "reason_codes": [
+      "paired_sample_size",
+      "p95_latency"
+    ],
+    "summary": "样本量不足且延迟超过门槛，仅允许继续离线验证。"
+  }
+}

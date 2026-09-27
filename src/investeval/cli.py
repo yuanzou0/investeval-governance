@@ -8,6 +8,7 @@ from pathlib import Path
 from .evaluator import evaluate_cases
 from .governance import GovernanceService
 from .loader import load_cases, load_facts
+from .rollout import load_and_compare
 from .web_api import serve
 
 
@@ -39,6 +40,15 @@ def _serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def _compare(args: argparse.Namespace) -> int:
+    payload = load_and_compare(args.runs)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"decision": payload["decision"], "delta": payload["delta"]}, ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="investeval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -54,6 +64,10 @@ def main() -> int:
     api.add_argument("--host", default="127.0.0.1")
     api.add_argument("--port", type=int, default=8000)
     api.set_defaults(func=_serve)
+    compare = subparsers.add_parser("compare")
+    compare.add_argument("--runs", default="data/version-runs.json")
+    compare.add_argument("--output", default="artifacts/version-comparison.json")
+    compare.set_defaults(func=_compare)
     args = parser.parse_args()
     return args.func(args)
 
