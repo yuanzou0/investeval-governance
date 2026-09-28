@@ -21,6 +21,7 @@ AI 工具：Codex 编码助手
 | 治理后端 | 生成日志导入、筛选、详情和人工复核服务 | `governance.py`、`web_api.py` | 服务测试与真实 HTTP 调用 | 已完成 |
 | 版本治理 | 构造合成配对输入并实现证据门控 | `version-runs.json`、`rollout.py` | 配对一致性和门控原因测试 | 已完成 |
 | 行为与热点治理 | 构造配对匿名反馈和时间上下文检查 | Baseline/Candidate信号文件、`signals.py` | 配对一致性、信号边界与时效规则测试 | 已完成 |
+| 接口故障治理 | 构造模拟超时、限流、鉴权、5xx、Schema漂移和不可用场景 | `provider.py`、接口故障场景及结果JSON | 自动测试验证所有异常均fail-closed | 已完成 |
 | Web 产品 | 生成质量工作台和版本比较页面 | `dist/` | JS语法、HTML解析、本地HTTP和部署检查 | 已完成 |
 | 文档 | 起草 README、AI记录和边界说明 | `README.md`、本文 | 与代码、数据和产出逐项核对 | 已完成 |
 
@@ -49,7 +50,7 @@ AI 工具：Codex 编码助手
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-最近一次本地结果：30 项测试通过，0 项失败。
+最近一次本地结果：33 项测试通过，0 项失败。
 
 覆盖范围包括四类意图、32条分层配对样本、按意图结果与回归检查、13条压力样例预期错误码、回答要点覆盖与可执行修复闭环、画像事实不变性、Bad Case筛选和详情、人工复核、版本配对一致性、HOLD 原因、行为观察配对一致性，以及热点时间检查。
 
@@ -95,7 +96,7 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 
 ### 文件、接口和部署检查
 
-已经执行 JSON 语法解析、JavaScript 语法检查、HTML 解析、本地静态页面和版本数据 HTTP 200 检查、API健康与人工复核调用，以及公开站点的无登录访问检查。
+已经执行 JSON 语法解析、JavaScript 语法检查、HTML 解析、本地静态页面和版本数据 HTTP 200 检查、API健康与人工复核调用，以及公开站点的无登录访问检查。额外使用8个冻结模拟响应演练数据提供方异常：超时、429、401、403、503、Schema漂移和整体不可用均禁止事实进入评测并返回 `HOLD`。这只证明本项目的故障处理合同，不证明真实扶摇或iFinD接口行为。
 
 ## 人工验证状态
 
@@ -139,6 +140,8 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 | 行为与热点结果 | `artifacts/signals-context-summary.json` |
 | 可执行改善闭环输入 | `data/improvement-loop.json` |
 | 可执行改善闭环结果 | `artifacts/improvement-loop-results.json` |
+| 数据提供方故障输入 | `data/provider-failure-scenarios.json` |
+| 数据提供方故障结果 | `artifacts/provider-failure-drill.json` |
 
 ## 结论边界
 

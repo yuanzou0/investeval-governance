@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "provider_mode": "simulated_failure_drill",
+  "summary": {
+    "scenario_count": 8,
+    "passed_count": 1,
+    "fail_closed_count": 7,
+    "all_failures_block_fact_use": true
+  },
+  "results": [
+    {
+      "scenario_id": "provider-healthy",
+      "status": "PASS",
+      "error_code": null,
+      "allow_fact_use": true,
+      "rollout_decision": "CONTINUE_EVALUATION",
+      "reason": "provider response is complete and may enter fact verification"
+    },
+    {
+      "scenario_id": "provider-timeout",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_TIMEOUT",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider request timed out"
+    },
+    {
+      "scenario_id": "provider-rate-limited",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_RATE_LIMITED",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider returned HTTP 429"
+    },
+    {
+      "scenario_id": "provider-unauthorized",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_AUTH_FAILED",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider returned HTTP 401"
+    },
+    {
+      "scenario_id": "provider-forbidden",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_AUTH_FAILED",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider returned HTTP 403"
+    },
+    {
+      "scenario_id": "provider-upstream-5xx",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_UPSTREAM_ERROR",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider returned HTTP 503"
+    },
+    {
+      "scenario_id": "provider-schema-drift",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_SCHEMA_INVALID",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider payload missing fields: ['value', 'as_of', 'source']"
+    },
+    {
+      "scenario_id": "provider-unavailable",
+      "status": "FAIL_CLOSED",
+      "error_code": "PROVIDER_UNAVAILABLE",
+      "allow_fact_use": false,
+      "rollout_decision": "HOLD",
+      "reason": "data provider is unavailable"
+    }
+  ],
+  "evidence_boundary": "Synthetic provider-failure evidence only; this does not prove a live Fuyao or iFinD integration."
+}

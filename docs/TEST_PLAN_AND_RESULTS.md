@@ -23,7 +23,7 @@
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-结果：**30项通过，0项失败**。
+结果：**33项通过，0项失败**。
 
 ### 主链路
 
@@ -59,8 +59,14 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 | Baseline/Candidate案例不配对 | 拒绝计算版本结论 | PASS |
 | 重复反馈事件ID | 拒绝聚合 | PASS |
 | 未支持的反馈类型 | 拒绝聚合 | PASS |
+| 数据提供方超时 | 禁止事实进入评测，输出 `PROVIDER_TIMEOUT` 并 `HOLD` | PASS |
+| HTTP 429限流 | 禁止事实进入评测，输出 `PROVIDER_RATE_LIMITED` 并 `HOLD` | PASS |
+| HTTP 401/403 | 禁止事实进入评测，输出 `PROVIDER_AUTH_FAILED` 并 `HOLD` | PASS |
+| 上游5xx | 禁止事实进入评测，输出 `PROVIDER_UPSTREAM_ERROR` 并 `HOLD` | PASS |
+| 字段缺失或Schema漂移 | 禁止事实进入评测，输出 `PROVIDER_SCHEMA_INVALID` 并 `HOLD` | PASS |
+| 数据源不可用 | 禁止事实进入评测，输出 `PROVIDER_UNAVAILABLE` 并 `HOLD` | PASS |
 
-HTTP层已人工调用并确认：健康检查、质量汇总、Bad Case筛选、案例详情和人工复核均返回预期JSON；无效请求由API映射为400或404。由于当前没有外部金融数据接口，网络超时、限流和上游5xx仅列为未覆盖项，未伪造通过结果。
+HTTP层已人工调用并确认：健康检查、质量汇总、Bad Case筛选、案例详情和人工复核均返回预期JSON；无效请求由API映射为400或404。数据提供方故障使用8个冻结模拟场景验证：1个健康响应可继续评测，7个异常全部 fail-closed。该证据验证本项目的错误处理合同，不代表已经连接真实外部金融接口。
 
 ### 合规与个性化边界
 
@@ -87,6 +93,7 @@ PYTHONPATH=src python3 -m investeval.cli evaluate \
 PYTHONPATH=src python3 -m investeval.cli compare
 PYTHONPATH=src python3 -m investeval.cli signals
 PYTHONPATH=src python3 -m investeval.cli improve
+PYTHONPATH=src python3 -m investeval.cli provider-drill
 ```
 
 对应证据：
@@ -96,6 +103,7 @@ PYTHONPATH=src python3 -m investeval.cli improve
 - `artifacts/version-comparison.json`
 - `artifacts/signals-context-summary.json`
 - `artifacts/improvement-loop-results.json`
+- `artifacts/provider-failure-drill.json`
 
 ## Web检查
 
@@ -110,7 +118,7 @@ PYTHONPATH=src python3 -m investeval.cli improve
 
 ## 未覆盖测试
 
-- 扶摇或iFinD真实接口的成功、超时、限流、鉴权失败和字段漂移；
+- 扶摇或iFinD真实接口的成功率、实际错误格式、SLA、重试恢复和字段版本协商；
 - 真实LLM的意图识别、必需要点抽取与Claim抽取质量；
 - 独立人工标注集上的准确率、召回率和一致性；
 - 多用户并发复核、权限隔离和审计日志；

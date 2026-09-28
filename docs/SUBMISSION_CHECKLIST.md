@@ -33,9 +33,10 @@ GitHub URL：<https://github.com/yuanzou0/investeval-governance>
 
 ## 测试和证据
 
-- [x] 30项自动测试通过
+- [x] 33项自动测试通过
 - [x] 主链路测试说明
 - [x] 数据与接口异常测试说明
+- [x] 模拟数据提供方超时、429、401/403、5xx、Schema漂移和不可用均fail-closed
 - [x] 合规和个性化边界测试说明
 - [x] 关键数字可追溯到JSON产出
 - [x] AI使用与验证记录

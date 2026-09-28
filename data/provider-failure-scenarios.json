@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "provider": "synthetic-financial-data-provider",
+  "scenarios": [
+    {
+      "scenario_id": "provider-healthy",
+      "status_code": 200,
+      "payload": {"value": 12.34, "as_of": "2026-09-27", "source": "fixture://provider/healthy"}
+    },
+    {"scenario_id": "provider-timeout", "timed_out": true},
+    {"scenario_id": "provider-rate-limited", "status_code": 429},
+    {"scenario_id": "provider-unauthorized", "status_code": 401},
+    {"scenario_id": "provider-forbidden", "status_code": 403},
+    {"scenario_id": "provider-upstream-5xx", "status_code": 503},
+    {
+      "scenario_id": "provider-schema-drift",
+      "status_code": 200,
+      "payload": {"price": 12.34, "date": "2026-09-27"}
+    },
+    {"scenario_id": "provider-unavailable", "available": false}
+  ]
+}

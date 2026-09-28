@@ -9,6 +9,7 @@ from .evaluator import evaluate_cases
 from .governance import GovernanceService
 from .improvement import load_and_run
 from .loader import load_cases, load_facts
+from .provider import run_provider_drill
 from .rollout import load_and_compare
 from .signals import load_signal_summary
 from .web_api import serve
@@ -79,6 +80,15 @@ def _improve(args: argparse.Namespace) -> int:
     return 0
 
 
+def _provider_drill(args: argparse.Namespace) -> int:
+    payload = run_provider_drill(args.scenarios)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(payload["summary"], ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="investeval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -110,6 +120,10 @@ def main() -> int:
     improve.add_argument("--loop", default="data/improvement-loop.json")
     improve.add_argument("--output", default="artifacts/improvement-loop-results.json")
     improve.set_defaults(func=_improve)
+    provider_drill = subparsers.add_parser("provider-drill")
+    provider_drill.add_argument("--scenarios", default="data/provider-failure-scenarios.json")
+    provider_drill.add_argument("--output", default="artifacts/provider-failure-drill.json")
+    provider_drill.set_defaults(func=_provider_drill)
     args = parser.parse_args()
     return args.func(args)
 

@@ -114,9 +114,14 @@ Bad Case 分类与证据血缘
 - `data/improvement-loop.json`：同一问题的 Baseline/Candidate 结构化输入、人工归因与 Prompt 修复记录；
 - `data/user-feedback.json`、`data/user-feedback-candidate.json`：16组配对匿名合成行为观察；
 - `data/hot-context.json`、`data/hot-context-candidate.json`：4组配对热点时间一致性检查；
+- `data/provider-failure-scenarios.json`：8个模拟数据提供方场景，覆盖健康响应及7个接口异常；
 - `fixture://`：明确表示本地合成来源，不冒充真实外部链接。
 
 数据没有真实姓名、账户、持仓、交易记录或其他个人信息。当前未连接扶摇或 iFinD MCP。未来可以通过标准数据提供者接口接入行情、财务、基金、公告和新闻数据，但接入前必须验证授权、时间戳、接口失败语义和数据许可。
+
+### 数据接口异常与 fail-closed
+
+项目使用模拟提供方响应验证故障策略，不伪装成真实扶摇或 iFinD 调用。覆盖超时、HTTP 429、HTTP 401/403、上游 5xx、字段缺失或 Schema 漂移，以及数据源整体不可用。上述异常一律禁止数据进入事实核验，输出可追溯错误码并将发布决策置为 `HOLD`；只有字段完整的 HTTP 200 响应才可继续评测。输入与结果分别位于 `data/provider-failure-scenarios.json` 和 `artifacts/provider-failure-drill.json`。
 
 ### 为什么使用两套评测集
 
@@ -191,6 +196,7 @@ data/                         冻结事实、问答案例和配对版本输入
 src/investeval/models.py      类型化数据合同
 src/investeval/evaluator.py   事实、KYC、合规和隐私评测
 src/investeval/improvement.py 执行 Baseline→归因→Candidate 修复证据
+src/investeval/provider.py    数据提供方异常归一化与 fail-closed 决策
 src/investeval/governance.py  导入、筛选、详情和人工复核服务
 src/investeval/rollout.py     配对版本比较和上线门控
 src/investeval/signals.py     用户行为聚合和热点时间检查
@@ -240,6 +246,11 @@ PYTHONPATH=src python3 -m investeval.cli improve \
   --loop data/improvement-loop.json \
   --output artifacts/improvement-loop-results.json
 
+# 演练数据提供方异常与 fail-closed 决策
+PYTHONPATH=src python3 -m investeval.cli provider-drill \
+  --scenarios data/provider-failure-scenarios.json \
+  --output artifacts/provider-failure-drill.json
+
 # 启动治理 API
 PYTHONPATH=src python3 -m investeval.cli serve --port 8000
 
@@ -263,7 +274,7 @@ python3 -m http.server 8790 --directory dist
 
 ## 测试与验证
 
-当前包含 30 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、回答要点覆盖与答非所问、可执行修复闭环、预期错误标签复现、事实个性化、数据来源协议、人工复核、配对一致性、上线门控、行为信号对比及热点时间检查。
+当前包含 33 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、回答要点覆盖与答非所问、可执行修复闭环、预期错误标签复现、事实个性化、数据来源协议、人工复核、配对一致性、上线门控、行为信号对比、热点时间检查及模拟数据接口 fail-closed。
 
 已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及公开部署和无登录访问检查。
 
@@ -271,7 +282,7 @@ python3 -m http.server 8790 --directory dist
 
 ## 已知边界与未做事项
 
-- 没有连接扶摇、iFinD 或其他实时金融数据接口；
+- 没有连接扶摇、iFinD 或其他实时金融数据接口；当前接口异常证据来自模拟响应，不能证明真实供应商的 SLA、错误格式或恢复行为；
 - 没有自然语言 Claim 提取模型，当前 Claim 已结构化；
 - 当前答非所问依赖上游声明的 `required_answer_aspects` 与结构化覆盖结果，尚未实现开放语义的自动要点提取；
 - 热点上下文目前只检查时效、未来信息泄漏和事件日期错配，尚未检测新闻重要信息遗漏；
@@ -285,8 +296,7 @@ python3 -m http.server 8790 --directory dist
 
 ## 下一步
 
-1. 增加数据或接口异常测试说明和演示材料；
-2. 使用真实匿名分布重新校准场景权重，并引入独立人工标注；
-3. 实现 `FinancialDataProvider`，在获得授权后接入扶摇或 iFinD；
-4. 将人工复核迁移到持久化多用户后端；
-5. 在满足样本量和延迟门槛后，再评估受限灰度。
+1. 使用真实匿名分布重新校准场景权重，并引入独立人工标注；
+2. 在获得授权后接入扶摇或 iFinD，并用真实错误响应校准当前模拟故障合同；
+3. 将人工复核迁移到持久化多用户后端；
+4. 在满足样本量和延迟门槛后，再评估受限灰度。
