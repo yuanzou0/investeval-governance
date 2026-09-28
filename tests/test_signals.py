@@ -1,0 +1,40 @@
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+from investeval.signals import evaluate_hot_context, load_signal_summary, summarize_feedback
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class SignalGovernanceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.summary = load_signal_summary(ROOT / "data" / "user-feedback.json", ROOT / "data" / "hot-context.json")
+
+    def test_behavior_signals_create_an_investigation_queue(self) -> None:
+        feedback = self.summary["feedback"]
+        self.assertGreater(feedback["escalated_case_count"], 0)
+        self.assertIn("never override", feedback["interpretation_boundary"])
+
+    def test_helpful_feedback_does_not_clear_compliance_case(self) -> None:
+        row = next(item for item in self.summary["feedback"]["cases"] if item["case_id"] == "compliance-guarantee")
+        self.assertEqual(2, row["helpful"])
+        self.assertEqual("observe", row["action"])
+
+    def test_hot_context_detects_stale_future_and_mismatched_event_time(self) -> None:
+        findings = {finding for result in self.summary["hot_context"]["results"] for finding in result["findings"]}
+        self.assertEqual({"HOT_CONTEXT_STALE", "FUTURE_CONTEXT_LEAK", "EVENT_TIME_MISMATCH"}, findings)
+
+    def test_duplicate_feedback_event_is_rejected(self) -> None:
+        event = {"event_id": "same", "case_id": "x", "signal": "helpful", "occurred_at": "2026-09-27T10:00:00Z"}
+        with self.assertRaisesRegex(ValueError, "duplicate feedback"):
+            summarize_feedback({"events": [event, event]})
+
+
+if __name__ == "__main__":
+    unittest.main()
+

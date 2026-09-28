@@ -14,13 +14,19 @@ const labels = {
   FACT_PERSONALIZED: "事实被个性化",
   GUARANTEED_RETURN: "承诺收益",
   PRIVACY_OVERREACH: "隐私越界",
+  HOT_CONTEXT_STALE: "热点已过期",
+  FUTURE_CONTEXT_LEAK: "未来信息泄漏",
+  EVENT_TIME_MISMATCH: "事件日期错配",
+  human_review: "人工复核",
+  quality_investigation: "质量调查",
+  observe: "持续观察",
   pending: "待复核",
   confirmed: "已确认",
   dismissed: "已驳回",
   resolved: "已修复"
 };
 
-const state = { cases: [], facts: [], results: [], comparison: null, selectedId: null, imported: [] };
+const state = { cases: [], facts: [], results: [], comparison: null, signals: null, selectedId: null, imported: [] };
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -38,19 +44,21 @@ function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JS
 
 async function loadData() {
   $("#load-status").textContent = "载入中";
-  const [caseResponse, factResponse, resultResponse, comparisonResponse] = await Promise.all([
+  const [caseResponse, factResponse, resultResponse, comparisonResponse, signalsResponse] = await Promise.all([
     fetch("data/cases.json", { cache: "no-store" }),
     fetch("data/facts.json", { cache: "no-store" }),
     fetch("data/evaluation-results.json", { cache: "no-store" }),
-    fetch("data/version-comparison.json", { cache: "no-store" })
+    fetch("data/version-comparison.json", { cache: "no-store" }),
+    fetch("data/signals-context-summary.json", { cache: "no-store" })
   ]);
-  if (![caseResponse, factResponse, resultResponse, comparisonResponse].every((response) => response.ok)) {
+  if (![caseResponse, factResponse, resultResponse, comparisonResponse, signalsResponse].every((response) => response.ok)) {
     throw new Error("冻结评测数据载入失败");
   }
   state.cases = (await caseResponse.json()).cases;
   state.facts = (await factResponse.json()).facts;
   state.results = (await resultResponse.json()).results;
   state.comparison = await comparisonResponse.json();
+  state.signals = await signalsResponse.json();
   state.selectedId = null;
   populateFilters();
   render();
@@ -143,6 +151,36 @@ function renderComparison() {
   $("#latency-delta").textContent = `${delta.p95_latency_ms >= 0 ? "+" : ""}${delta.p95_latency_ms}ms`;
 }
 
+function renderSignals() {
+  if (!state.signals) return;
+  const feedback = state.signals.feedback;
+  const hot = state.signals.hot_context;
+  const resultMap = new Map(state.results.map((result) => [result.case_id, result]));
+  $("#feedback-event-count").textContent = String(feedback.event_count);
+  $("#negative-rate").textContent = `${(feedback.negative_signal_rate * 100).toFixed(0)}%`;
+  $("#negative-count").textContent = `${feedback.negative_signal_count} 个负向信号`;
+  $("#escalated-count").textContent = String(feedback.escalated_case_count);
+  $("#hot-failed-count").textContent = String(hot.failed_count);
+  $("#hot-pass-count").textContent = `${hot.passed_count} / ${hot.check_count} 条通过`;
+  $("#feedback-case-count").textContent = `${feedback.cases.length} 条`;
+  $("#hot-check-count").textContent = `${hot.check_count} 条`;
+  $("#feedback-table-body").innerHTML = feedback.cases.map((item) => {
+    const factual = resultMap.get(item.case_id);
+    const factualPass = factual?.passed ?? false;
+    return `<tr>
+      <td><span class="case-id">${escapeHtml(item.case_id)}</span></td>
+      <td><div class="feedback-counts"><span class="mini-signal">赞 ${item.helpful}</span><span class="mini-signal negative">踩 ${item.not_helpful}</span><span class="mini-signal negative">重问 ${item.retry}</span><span class="mini-signal negative">报 ${item.report}</span></div></td>
+      <td><span class="badge ${factualPass ? "ok" : "error"}">${factualPass ? "事实通过" : "仍为 Bad Case"}</span></td>
+      <td><span class="badge ${item.escalated ? "pending" : ""}">${escapeHtml(labels[item.action] || item.action)}</span></td>
+    </tr>`;
+  }).join("");
+  $("#hot-context-list").innerHTML = hot.results.map((item) => `<div class="hot-row">
+    <div class="hot-row-head"><strong>${escapeHtml(item.check_id)}</strong><span class="badge ${item.passed ? "ok" : "error"}">${item.passed ? "PASS" : "FAIL"}</span></div>
+    <p>案例 ${escapeHtml(item.case_id)} · 来源相对提问 ${item.age_hours} 小时 · 上限 ${item.maximum_age_hours} 小时</p>
+    <div class="hot-findings">${item.findings.length ? item.findings.map((code) => `<span class="badge error">${escapeHtml(labels[code] || code)}</span>`).join("") : '<span class="badge ok">时间上下文一致</span>'}</div>
+  </div>`).join("");
+}
+
 function renderTable(items) {
   const filtered = filteredCases();
   $("#result-count").textContent = `${filtered.length} 条`;
@@ -208,6 +246,7 @@ function render() {
   renderTable(items);
   renderDetail(items);
   renderComparison();
+  renderSignals();
 }
 
 function showToast(message) {

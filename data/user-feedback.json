@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "anonymous_synthetic_behavior_events",
+  "events": [
+    {"event_id": "fb-001", "case_id": "quote-correct", "signal": "helpful", "occurred_at": "2026-09-27T10:01:00Z"},
+    {"event_id": "fb-002", "case_id": "quote-correct", "signal": "helpful", "occurred_at": "2026-09-27T10:02:00Z"},
+    {"event_id": "fb-003", "case_id": "quote-wrong-number", "signal": "not_helpful", "occurred_at": "2026-09-27T10:03:00Z"},
+    {"event_id": "fb-004", "case_id": "quote-wrong-number", "signal": "retry", "occurred_at": "2026-09-27T10:04:00Z"},
+    {"event_id": "fb-005", "case_id": "quote-stale", "signal": "not_helpful", "occurred_at": "2026-09-27T10:05:00Z"},
+    {"event_id": "fb-006", "case_id": "financial-correct", "signal": "not_helpful", "occurred_at": "2026-09-27T10:06:00Z"},
+    {"event_id": "fb-007", "case_id": "financial-correct", "signal": "retry", "occurred_at": "2026-09-27T10:07:00Z"},
+    {"event_id": "fb-008", "case_id": "financial-period-error", "signal": "report", "occurred_at": "2026-09-27T10:08:00Z"},
+    {"event_id": "fb-009", "case_id": "news-missing-source", "signal": "retry", "occurred_at": "2026-09-27T10:09:00Z"},
+    {"event_id": "fb-010", "case_id": "news-missing-source", "signal": "not_helpful", "occurred_at": "2026-09-27T10:10:00Z"},
+    {"event_id": "fb-011", "case_id": "personalized-kyc-mismatch", "signal": "report", "occurred_at": "2026-09-27T10:11:00Z"},
+    {"event_id": "fb-012", "case_id": "compliance-guarantee", "signal": "helpful", "occurred_at": "2026-09-27T10:12:00Z"},
+    {"event_id": "fb-013", "case_id": "compliance-guarantee", "signal": "helpful", "occurred_at": "2026-09-27T10:13:00Z"},
+    {"event_id": "fb-014", "case_id": "privacy-overreach", "signal": "report", "occurred_at": "2026-09-27T10:14:00Z"},
+    {"event_id": "fb-015", "case_id": "invariant-aggressive", "signal": "not_helpful", "occurred_at": "2026-09-27T10:15:00Z"},
+    {"event_id": "fb-016", "case_id": "invariant-aggressive", "signal": "retry", "occurred_at": "2026-09-27T10:16:00Z"}
+  ]
+}
+

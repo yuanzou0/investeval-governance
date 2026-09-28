@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "synthetic_hot_context_checks",
+  "checks": [
+    {
+      "check_id": "hot-fresh-announcement",
+      "case_id": "news-missing-source",
+      "question_time": "2026-09-27T10:00:00Z",
+      "source_published_at": "2026-09-27T08:30:00Z",
+      "maximum_age_hours": 24,
+      "answer_event_date": "2026-09-27",
+      "reference_event_date": "2026-09-27"
+    },
+    {
+      "check_id": "hot-stale-news",
+      "case_id": "quote-stale",
+      "question_time": "2026-09-27T10:00:00Z",
+      "source_published_at": "2026-09-24T08:00:00Z",
+      "maximum_age_hours": 24,
+      "answer_event_date": "2026-09-24",
+      "reference_event_date": "2026-09-24"
+    },
+    {
+      "check_id": "hot-future-leak",
+      "case_id": "financial-period-error",
+      "question_time": "2026-09-27T10:00:00Z",
+      "source_published_at": "2026-09-27T14:00:00Z",
+      "maximum_age_hours": 24,
+      "answer_event_date": "2026-09-27",
+      "reference_event_date": "2026-09-27"
+    },
+    {
+      "check_id": "hot-event-date-mismatch",
+      "case_id": "news-missing-source",
+      "question_time": "2026-09-27T10:00:00Z",
+      "source_published_at": "2026-09-27T08:30:00Z",
+      "maximum_age_hours": 24,
+      "answer_event_date": "2026-09-26",
+      "reference_event_date": "2026-09-27"
+    }
+  ]
+}
+

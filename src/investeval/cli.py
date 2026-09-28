@@ -9,6 +9,7 @@ from .evaluator import evaluate_cases
 from .governance import GovernanceService
 from .loader import load_cases, load_facts
 from .rollout import load_and_compare
+from .signals import load_signal_summary
 from .web_api import serve
 
 
@@ -49,6 +50,15 @@ def _compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def _signals(args: argparse.Namespace) -> int:
+    payload = load_signal_summary(args.feedback, args.hot_context)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"feedback": payload["feedback"], "hot_context": {key: payload["hot_context"][key] for key in ("check_count", "passed_count", "failed_count")}}, ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="investeval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -68,6 +78,11 @@ def main() -> int:
     compare.add_argument("--runs", default="data/version-runs.json")
     compare.add_argument("--output", default="artifacts/version-comparison.json")
     compare.set_defaults(func=_compare)
+    signals = subparsers.add_parser("signals")
+    signals.add_argument("--feedback", default="data/user-feedback.json")
+    signals.add_argument("--hot-context", default="data/hot-context.json")
+    signals.add_argument("--output", default="artifacts/signals-context-summary.json")
+    signals.set_defaults(func=_signals)
     args = parser.parse_args()
     return args.func(args)
 
