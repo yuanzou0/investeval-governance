@@ -21,9 +21,11 @@ Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 - [x] 未发现密钥、令牌或密码模式
 - [x] README完整
 - [x] 复现命令完整
-- [ ] 创建候选人可分享的GitHub仓库
-- [ ] 确认仓库可见性和评审访问方式
+- [x] 创建候选人可分享的GitHub仓库
+- [x] 确认仓库当前为私有；提交前邀请评审或改为公开
 - [ ] 在干净环境执行README命令
+
+GitHub URL：<https://github.com/yuanzou0/investeval-governance>
 
 ## 测试和证据
 
@@ -57,4 +59,3 @@ Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 ## 提交前最终声明
 
 提交材料应明确：数据为匿名合成冻结样例；未连接扶摇或iFinD；Candidate结果不是线上A/B实验；当前门控结论为HOLD；产品不构成投资建议。
-
