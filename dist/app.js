@@ -113,16 +113,22 @@ function filteredCases() {
 
 function renderMetrics(items) {
   const passed = items.filter((item) => item.result.passed).length;
-  const pending = items.filter((item) => !item.result.passed && item.review.status === "pending").length;
-  const critical = items.filter((item) => item.result.findings.some((finding) => finding.severity === "critical")).length;
+  const pendingItems = items.filter((item) => !item.result.passed && item.review.status === "pending");
+  const severityRank = { low: 1, medium: 2, high: 3, critical: 4 };
+  const severityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  pendingItems.forEach((item) => {
+    const highest = item.result.findings.reduce((current, finding) =>
+      (severityRank[finding.severity] || 0) > (severityRank[current] || 0) ? finding.severity : current, "low");
+    severityCounts[highest] += 1;
+  });
   const verified = items.filter((item) => item.result.checked_fact_ids.length > 0).length;
   const representative = state.representative?.summary;
   $("#representative-pass-rate").textContent = representative ? `${(representative.pass_rate * 100).toFixed(1)}%` : "—";
   $("#representative-pass-count").textContent = representative ? `${representative.passed_count} / ${representative.case_count} 条通过` : "—";
   $("#pass-rate").textContent = items.length ? `${(passed / items.length * 100).toFixed(1)}%` : "—";
   $("#pass-count").textContent = `${passed} / ${items.length} 条通过 · 标签复现 11/11`;
-  $("#pending-count").textContent = String(pending);
-  $("#critical-count").textContent = `${critical} 条严重合规风险`;
+  $("#pending-count").textContent = String(pendingItems.length);
+  $("#severity-breakdown").textContent = `Critical ${severityCounts.critical} · High ${severityCounts.high} · Medium ${severityCounts.medium}`;
   $("#evidence-rate").textContent = items.length ? `${Math.round(verified / items.length * 100)}%` : "—";
 }
 
@@ -277,6 +283,17 @@ document.querySelectorAll("[data-view]").forEach((button) => button.addEventList
   document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }));
+$("#pending-card").addEventListener("click", () => {
+  document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== "quality-view"; });
+  document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === "quality-view"));
+  $("#outcome-filter").value = "bad_case";
+  $("#intent-filter").value = "all";
+  $("#error-filter").value = "all";
+  $("#review-filter").value = "pending";
+  state.selectedId = null;
+  render();
+  $(".workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 $("#reload-button").addEventListener("click", () => loadData().then(() => showToast("冻结评测已重新载入")).catch((error) => showToast(error.message)));
 $("#case-upload").addEventListener("change", async (event) => {
   const file = event.target.files[0];
