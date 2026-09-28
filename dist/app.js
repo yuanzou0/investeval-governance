@@ -23,7 +23,8 @@ const labels = {
   pending: "待复核",
   confirmed: "已确认",
   dismissed: "已驳回",
-  resolved: "已修复"
+  resolved: "已修复",
+  not_required: "无需复核"
 };
 
 const state = { cases: [], facts: [], results: [], representative: null, comparison: null, signals: null, selectedId: null, imported: [] };
@@ -36,9 +37,9 @@ function escapeHtml(value) {
 }
 
 function reviewKey(caseId) { return `investeval-review:${caseId}`; }
-function getReview(caseId) {
-  try { return JSON.parse(localStorage.getItem(reviewKey(caseId))) || { status: "pending" }; }
-  catch { return { status: "pending" }; }
+function getReview(caseId, passed) {
+  try { return JSON.parse(localStorage.getItem(reviewKey(caseId))) || { status: passed ? "not_required" : "pending" }; }
+  catch { return { status: passed ? "not_required" : "pending" }; }
 }
 function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JSON.stringify(review)); }
 
@@ -82,7 +83,10 @@ function populateFilters() {
 
 function joinedCases() {
   const resultMap = new Map(state.results.map((result) => [result.case_id, result]));
-  return [...state.cases, ...state.imported].map((item) => ({ ...item, result: resultMap.get(item.case_id) || importedResult(item), review: getReview(item.case_id) }));
+  return [...state.cases, ...state.imported].map((item) => {
+    const result = resultMap.get(item.case_id) || importedResult(item);
+    return { ...item, result, review: getReview(item.case_id, result.passed) };
+  });
 }
 
 function importedResult(item) {
@@ -197,13 +201,17 @@ function renderTable(items) {
   $("#result-count").textContent = `${filtered.length} 条`;
   $("#empty-state").hidden = filtered.length > 0;
   $("#case-table-body").innerHTML = filtered.map((item) => {
-    const firstCode = item.result.findings[0]?.code;
+    const severityRank = { low: 1, medium: 2, high: 3, critical: 4 };
+    const primaryFinding = item.result.findings.reduce((highest, finding) =>
+      !highest || (severityRank[finding.severity] || 0) > (severityRank[highest.severity] || 0) ? finding : highest, null);
+    const extraFindingCount = Math.max(0, item.result.findings.length - 1);
+    const issueLabel = primaryFinding ? `${labels[primaryFinding.code] || primaryFinding.code}${extraFindingCount ? ` +${extraFindingCount}` : ""}` : "通过";
     const status = item.review.status || "pending";
     const scoreClass = item.result.score >= 90 ? "high" : item.result.score >= 60 ? "mid" : "low";
     return `<tr class="case-row ${state.selectedId === item.case_id ? "selected" : ""}" data-case-id="${escapeHtml(item.case_id)}" tabindex="0">
       <td><span class="case-id">${escapeHtml(item.case_id)}</span><span class="case-question">${escapeHtml(item.question)}</span></td>
       <td><span class="badge">${escapeHtml(labels[item.intent] || item.intent)}</span></td>
-      <td><span class="badge ${item.result.passed ? "ok" : "error"}">${escapeHtml(item.result.passed ? "通过" : labels[firstCode] || firstCode)}</span></td>
+      <td><span class="badge ${item.result.passed ? "ok" : "error"}">${escapeHtml(issueLabel)}</span></td>
       <td><span class="score ${scoreClass}">${item.result.score.toFixed(0)}</span></td>
       <td><span class="badge ${status === "pending" ? "pending" : ""}">${escapeHtml(labels[status] || status)}</span></td>
     </tr>`;
@@ -227,6 +235,13 @@ function renderDetail(items) {
   </div>`).join("") : '<span class="badge ok">未发现确定性问题</span>';
   const checked = item.result.checked_fact_ids.length ? item.result.checked_fact_ids.join(", ") : "未核验事实";
   const kyc = item.kyc ? `${item.kyc.risk_level} · ${item.kyc.horizon} · ${item.kyc.experience}` : "无画像";
+  const reviewSection = item.result.passed
+    ? '<section class="detail-section"><h3>人工复核</h3><span class="badge ok">无需复核</span><p>自动评测未发现确定性问题；如用户举报或抽检命中，可重新进入人工队列。</p></section>'
+    : `<section class="detail-section"><h3>人工复核</h3><form id="review-form" class="review-form">
+      <label>审核人<input name="reviewer" value="${escapeHtml(item.review.reviewer || "审核员-A")}" required></label>
+      <label>复核说明<textarea name="note">${escapeHtml(item.review.note || "")}</textarea></label>
+      <div class="review-actions"><button type="button" class="secondary-button" data-review-status="dismissed">驳回误报</button><button type="button" class="primary-button" data-review-status="confirmed">确认问题</button></div>
+    </form></section>`;
   $("#detail-panel").innerHTML = `
     <div class="detail-header"><div class="detail-title-row"><div><p class="eyebrow">CASE DETAIL</p><h2>${escapeHtml(item.case_id)}</h2></div><span class="score ${item.result.score < 60 ? "low" : "mid"}">${item.result.score.toFixed(0)}</span></div><p>${escapeHtml(labels[item.intent] || item.intent)}</p></div>
     <section class="detail-section"><h3>用户问题</h3><p>${escapeHtml(item.question)}</p><h3>Agent 回答</h3><div class="answer-block">${escapeHtml(item.answer)}</div></section>
@@ -236,11 +251,7 @@ function renderDetail(items) {
       <div><span>DATA</span><strong>${escapeHtml(item.data_version)}</strong></div><div><span>KYC</span><strong>${escapeHtml(kyc)}</strong></div>
       <div style="grid-column:1/-1"><span>CHECKED FACTS</span><strong>${escapeHtml(checked)}</strong></div>
     </div></section>
-    <section class="detail-section"><h3>人工复核</h3><form id="review-form" class="review-form">
-      <label>审核人<input name="reviewer" value="${escapeHtml(item.review.reviewer || "审核员-A")}" required></label>
-      <label>复核说明<textarea name="note">${escapeHtml(item.review.note || "")}</textarea></label>
-      <div class="review-actions"><button type="button" class="secondary-button" data-review-status="dismissed">驳回误报</button><button type="button" class="primary-button" data-review-status="confirmed">确认问题</button></div>
-    </form></section>`;
+    ${reviewSection}`;
   document.querySelectorAll("[data-review-status]").forEach((button) => button.addEventListener("click", () => {
     const form = $("#review-form");
     if (!form.reportValidity()) return;
