@@ -47,14 +47,14 @@ class RepresentativeFixtureTests(unittest.TestCase):
         cls.cases = load_cases(ROOT / "data" / "representative-cases.json")
         cls.results = {result.case_id: result for result in evaluate_cases(cls.cases, cls.facts)}
 
-    def test_stratified_design_has_six_cases_per_intent(self) -> None:
+    def test_stratified_design_has_eight_cases_per_intent(self) -> None:
         counts = {intent: sum(case.intent == intent for case in self.cases) for intent in {case.intent for case in self.cases}}
-        self.assertEqual(24, len(self.cases))
+        self.assertEqual(32, len(self.cases))
         self.assertEqual(4, len(counts))
-        self.assertEqual({6}, set(counts.values()))
+        self.assertEqual({8}, set(counts.values()))
 
     def test_stratified_design_has_declared_pass_rate_and_labels(self) -> None:
-        self.assertEqual(16, sum(result.passed for result in self.results.values()))
+        self.assertEqual(20, sum(result.passed for result in self.results.values()))
         for case in self.cases:
             with self.subTest(case=case.case_id):
                 actual = {finding.code for finding in self.results[case.case_id].findings}

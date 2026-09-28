@@ -65,7 +65,7 @@ async function loadData() {
   state.selectedId = null;
   populateFilters();
   render();
-  $("#load-status").textContent = `24 条分层样本 · ${state.cases.length} 条压力样本`;
+  $("#load-status").textContent = `32 条配对样本 · ${state.cases.length} 条压力回归样本`;
 }
 
 function populateFilters() {
@@ -139,7 +139,7 @@ function renderMetrics(items) {
 function renderComparison() {
   const comparison = state.comparison;
   if (!comparison) return;
-  const { baseline, candidate, delta, gates, decision } = comparison;
+  const { baseline, candidate, delta, gates, decision, intent_breakdown: intentBreakdown = [] } = comparison;
   $("#policy-version").textContent = comparison.policy_version;
   $("#baseline-version").textContent = `${baseline.model_version} · ${baseline.prompt_version} · ${baseline.data_version}`;
   $("#candidate-version").textContent = `${candidate.model_version} · ${candidate.prompt_version} · ${candidate.data_version}`;
@@ -151,6 +151,18 @@ function renderComparison() {
   $("#candidate-latency").textContent = `${candidate.p95_latency_ms}ms`;
   $("#pass-delta").textContent = `${delta.pass_rate_pp >= 0 ? "+" : ""}${delta.pass_rate_pp.toFixed(1)}pp`;
   $("#score-delta").textContent = `${delta.average_score >= 0 ? "+" : ""}${delta.average_score.toFixed(1)}`;
+  $("#intent-count").textContent = `${intentBreakdown.length} 类`;
+  $("#intent-comparison-body").innerHTML = intentBreakdown.map((item) => {
+    const deltaClass = item.delta.pass_rate_pp >= 0 && item.regressed_case_count === 0 ? "positive" : "negative";
+    return `<tr>
+      <td><span class="case-id">${escapeHtml(labels[item.intent] || item.intent)}</span><span class="case-question">${escapeHtml(item.intent)}</span></td>
+      <td>${item.sample_size}</td>
+      <td><strong>${(item.baseline.pass_rate * 100).toFixed(1)}%</strong><small>${item.baseline.passed_count}/${item.sample_size} · 均分 ${item.baseline.average_score.toFixed(1)} · 证据 ${(item.baseline.evidence_coverage * 100).toFixed(1)}%</small></td>
+      <td><strong>${(item.candidate.pass_rate * 100).toFixed(1)}%</strong><small>${item.candidate.passed_count}/${item.sample_size} · 均分 ${item.candidate.average_score.toFixed(1)} · 证据 ${(item.candidate.evidence_coverage * 100).toFixed(1)}%</small></td>
+      <td><span class="intent-delta ${deltaClass}">${item.delta.pass_rate_pp >= 0 ? "+" : ""}${item.delta.pass_rate_pp.toFixed(1)}pp</span></td>
+      <td><span class="badge ${item.regressed_case_count === 0 ? "ok" : "error"}">${item.regressed_case_count} 条</span></td>
+    </tr>`;
+  }).join("");
   $("#gate-count").textContent = `${gates.filter((gate) => gate.passed).length} / ${gates.length} 通过`;
   $("#gate-list").innerHTML = gates.map((gate) => `<div class="gate-row">
     <div class="gate-label"><strong>${escapeHtml(gate.label)}</strong><span>${gate.hard_blocker ? "硬性门槛" : "观察指标"}</span></div>

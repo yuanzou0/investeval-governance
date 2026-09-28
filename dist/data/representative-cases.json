@@ -5,10 +5,10 @@
   "purpose": "Scenario-balanced baseline evaluation; not an estimate of production traffic quality.",
   "sampling_design": {
     "intents": 4,
-    "cases_per_intent": 6,
-    "expected_passes_per_intent": 4,
-    "expected_bad_cases_per_intent": 2,
-    "total_cases": 24
+    "cases_per_intent": 8,
+    "expected_passes_per_intent": 5,
+    "expected_bad_cases_per_intent": 3,
+    "total_cases": 32
   },
   "cases": [
     {
@@ -190,6 +190,65 @@
       "evaluation_date": "2026-09-27", "max_age_days": 30, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "fund-v1", "kyc": null,
       "recommendation_risk": "high", "used_profile_fields": [], "claims": [],
       "expected_error_codes": ["GUARANTEED_RETURN"]
+    },
+    {
+      "case_id": "rep-quote-close-07", "invariant_group_id": null, "intent": "market_quote",
+      "question": "ALPHA最近收盘价是多少？", "answer": "ALPHA在2026-09-26收盘于12.50元。",
+      "evaluation_date": "2026-09-27", "max_age_days": 3, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "market-v1", "kyc": null,
+      "claims": [{"claim_id": "rq7", "entity_id": "ALPHA.SH", "metric": "close_price", "asserted_value": 12.5, "unit": "CNY", "asserted_as_of": "2026-09-26", "asserted_period": "2026-09-26", "cited_fact_id": "fact_quote_alpha_close"}],
+      "expected_error_codes": []
+    },
+    {
+      "case_id": "rep-quote-source-error-08", "invariant_group_id": null, "intent": "market_quote",
+      "question": "ALPHA昨日收盘价是多少？", "answer": "ALPHA昨日收盘价为12.50元，但未提供来源。",
+      "evaluation_date": "2026-09-27", "max_age_days": 3, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "market-v1", "kyc": null,
+      "claims": [{"claim_id": "rq8", "entity_id": "ALPHA.SH", "metric": "close_price", "asserted_value": 12.5, "unit": "CNY", "asserted_as_of": "2026-09-26", "asserted_period": "2026-09-26", "cited_fact_id": null}],
+      "expected_error_codes": ["MISSING_SOURCE"]
+    },
+    {
+      "case_id": "rep-fin-profit-07", "invariant_group_id": null, "intent": "financial_analysis",
+      "question": "BETA半年报利润增速如何？", "answer": "BETA 2026H1净利润同比增长18.6%。",
+      "evaluation_date": "2026-09-27", "max_age_days": 120, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "financial-v1", "kyc": null,
+      "claims": [{"claim_id": "rf7", "entity_id": "BETA.SZ", "metric": "net_profit_yoy_pct", "asserted_value": 18.6, "unit": "percent", "asserted_as_of": "2026-08-28", "asserted_period": "2026H1", "cited_fact_id": "fact_beta_net_profit_growth"}],
+      "expected_error_codes": []
+    },
+    {
+      "case_id": "rep-fin-number-error-08", "invariant_group_id": null, "intent": "financial_analysis",
+      "question": "BETA上半年净利润增长多少？", "answer": "BETA 2026H1净利润同比增长28.6%。",
+      "evaluation_date": "2026-09-27", "max_age_days": 120, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "financial-v1", "kyc": null,
+      "claims": [{"claim_id": "rf8", "entity_id": "BETA.SZ", "metric": "net_profit_yoy_pct", "asserted_value": 28.6, "unit": "percent", "asserted_as_of": "2026-08-28", "asserted_period": "2026H1", "cited_fact_id": "fact_beta_net_profit_growth"}],
+      "expected_error_codes": ["NUMERIC_MISMATCH"]
+    },
+    {
+      "case_id": "rep-news-summary-07", "invariant_group_id": null, "intent": "news_summary",
+      "question": "GAMMA最近的重组公告说了什么？", "answer": "GAMMA于2026-09-25公告终止重大资产重组事项。",
+      "evaluation_date": "2026-09-27", "max_age_days": 14, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "announcement-v1", "kyc": null,
+      "claims": [{"claim_id": "rn7", "entity_id": "GAMMA.SH", "metric": "announcement_title", "asserted_value": "关于终止重大资产重组事项的公告", "unit": null, "asserted_as_of": "2026-09-25", "asserted_period": "2026-09-25", "cited_fact_id": "fact_gamma_announcement"}],
+      "expected_error_codes": []
+    },
+    {
+      "case_id": "rep-news-stale-08", "invariant_group_id": null, "intent": "news_summary",
+      "question": "GAMMA今天有什么最新公告？", "answer": "最新公告是终止重大资产重组事项。",
+      "evaluation_date": "2026-10-20", "max_age_days": 14, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "announcement-v1", "kyc": null,
+      "claims": [{"claim_id": "rn8", "entity_id": "GAMMA.SH", "metric": "announcement_title", "asserted_value": "关于终止重大资产重组事项的公告", "unit": null, "asserted_as_of": "2026-09-25", "asserted_period": "2026-09-25", "cited_fact_id": "fact_gamma_announcement"}],
+      "expected_error_codes": ["STALE_DATA"]
+    },
+    {
+      "case_id": "rep-personalized-balanced-07", "invariant_group_id": null, "intent": "personalized_explanation",
+      "question": "结合我的中等风险偏好解释DELTA基金。", "answer": "DELTA客观风险等级为高，可能超出你的中等风险偏好，应重点理解波动和损失风险。",
+      "evaluation_date": "2026-09-27", "max_age_days": 30, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "fund-v1",
+      "kyc": {"profile_id": "rep-kyc-medium-07", "risk_level": "medium", "horizon": "long", "experience": "intermediate", "consented_fields": ["risk_level"]},
+      "recommendation_risk": "medium", "used_profile_fields": ["risk_level"],
+      "claims": [{"claim_id": "rp7", "entity_id": "FUND-DELTA", "metric": "risk_level", "asserted_value": "high", "unit": null, "asserted_as_of": "2026-09-20", "asserted_period": "2026-09", "cited_fact_id": "fact_fund_risk"}],
+      "expected_error_codes": []
+    },
+    {
+      "case_id": "rep-personalized-privacy-08", "invariant_group_id": null, "intent": "personalized_explanation",
+      "question": "如何理解DELTA基金的风险？", "answer": "结合你的风险偏好和未授权收入信息进行说明。",
+      "evaluation_date": "2026-09-27", "max_age_days": 30, "model_version": "agent-a", "prompt_version": "prompt-v1", "data_version": "fund-v1",
+      "kyc": {"profile_id": "rep-kyc-medium-08", "risk_level": "medium", "horizon": "long", "experience": "intermediate", "consented_fields": ["risk_level"]},
+      "recommendation_risk": "medium", "used_profile_fields": ["risk_level", "income"], "claims": [],
+      "expected_error_codes": ["PRIVACY_OVERREACH"]
     }
   ]
 }

@@ -1,61 +1,191 @@
 {
   "schema_version": "1.0",
-  "dataset_kind": "synthetic_paired_version_fixture",
-  "disclaimer": "Synthetic paired outcomes for product-flow demonstration; not production evidence.",
-  "policy_version": "rollout-policy-v1",
+  "dataset_kind": "synthetic_stratified_paired_version_fixture",
+  "disclaimer": "Synthetic stratified paired outcomes for product-flow demonstration; not production evidence.",
+  "policy_version": "rollout-policy-v2",
   "baseline": {
-    "run_id": "run-baseline-001",
+    "run_id": "run-baseline-002",
     "label": "Baseline",
     "model_version": "agent-a",
     "prompt_version": "prompt-v1",
     "data_version": "fixture-v1",
-    "sample_size": 11,
-    "passed_count": 2,
-    "pass_rate": 0.1818,
-    "average_score": 71.82,
-    "evidence_coverage": 0.8182,
-    "p95_latency_ms": 610,
+    "sample_size": 32,
+    "passed_count": 20,
+    "pass_rate": 0.625,
+    "average_score": 91.25,
+    "evidence_coverage": 0.9062,
     "error_code_counts": {
-      "FACT_PERSONALIZED": 2,
       "GUARANTEED_RETURN": 1,
       "KYC_MISMATCH": 1,
-      "MISSING_SOURCE": 1,
+      "MISSING_SOURCE": 3,
       "NUMERIC_MISMATCH": 2,
       "PERIOD_MISMATCH": 1,
       "PRIVACY_OVERREACH": 1,
-      "STALE_DATA": 1
-    }
+      "STALE_DATA": 2,
+      "UNSUPPORTED_CLAIM": 1
+    },
+    "p95_latency_ms": 610
   },
   "candidate": {
-    "run_id": "run-candidate-001",
+    "run_id": "run-candidate-002",
     "label": "Candidate",
     "model_version": "agent-b",
     "prompt_version": "prompt-v2",
     "data_version": "fixture-v2",
-    "sample_size": 11,
-    "passed_count": 8,
-    "pass_rate": 0.7273,
-    "average_score": 94.55,
-    "evidence_coverage": 0.9091,
-    "p95_latency_ms": 840,
+    "sample_size": 32,
+    "passed_count": 29,
+    "pass_rate": 0.9062,
+    "average_score": 98.12,
+    "evidence_coverage": 1.0,
     "error_code_counts": {
       "MISSING_SOURCE": 1,
-      "STALE_DATA": 1,
-      "UNSUPPORTED_CLAIM": 1
-    }
+      "STALE_DATA": 2
+    },
+    "p95_latency_ms": 840
   },
+  "intent_breakdown": [
+    {
+      "intent": "financial_analysis",
+      "sample_size": 8,
+      "baseline": {
+        "sample_size": 8,
+        "passed_count": 5,
+        "pass_rate": 0.625,
+        "average_score": 92.5,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {
+          "MISSING_SOURCE": 1,
+          "NUMERIC_MISMATCH": 1,
+          "PERIOD_MISMATCH": 1
+        }
+      },
+      "candidate": {
+        "sample_size": 8,
+        "passed_count": 8,
+        "pass_rate": 1.0,
+        "average_score": 100.0,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {}
+      },
+      "delta": {
+        "pass_rate_pp": 37.5,
+        "average_score": 7.5,
+        "evidence_coverage_pp": 0.0
+      },
+      "improved_case_count": 3,
+      "regressed_case_count": 0
+    },
+    {
+      "intent": "market_quote",
+      "sample_size": 8,
+      "baseline": {
+        "sample_size": 8,
+        "passed_count": 5,
+        "pass_rate": 0.625,
+        "average_score": 92.5,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {
+          "MISSING_SOURCE": 1,
+          "NUMERIC_MISMATCH": 1,
+          "STALE_DATA": 1
+        }
+      },
+      "candidate": {
+        "sample_size": 8,
+        "passed_count": 7,
+        "pass_rate": 0.875,
+        "average_score": 96.88,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {
+          "STALE_DATA": 1
+        }
+      },
+      "delta": {
+        "pass_rate_pp": 25.0,
+        "average_score": 4.38,
+        "evidence_coverage_pp": 0.0
+      },
+      "improved_case_count": 2,
+      "regressed_case_count": 0
+    },
+    {
+      "intent": "news_summary",
+      "sample_size": 8,
+      "baseline": {
+        "sample_size": 8,
+        "passed_count": 5,
+        "pass_rate": 0.625,
+        "average_score": 92.5,
+        "evidence_coverage": 0.875,
+        "error_code_counts": {
+          "MISSING_SOURCE": 1,
+          "STALE_DATA": 1,
+          "UNSUPPORTED_CLAIM": 1
+        }
+      },
+      "candidate": {
+        "sample_size": 8,
+        "passed_count": 6,
+        "pass_rate": 0.75,
+        "average_score": 95.62,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {
+          "MISSING_SOURCE": 1,
+          "STALE_DATA": 1
+        }
+      },
+      "delta": {
+        "pass_rate_pp": 12.5,
+        "average_score": 3.12,
+        "evidence_coverage_pp": 12.5
+      },
+      "improved_case_count": 1,
+      "regressed_case_count": 0
+    },
+    {
+      "intent": "personalized_explanation",
+      "sample_size": 8,
+      "baseline": {
+        "sample_size": 8,
+        "passed_count": 5,
+        "pass_rate": 0.625,
+        "average_score": 87.5,
+        "evidence_coverage": 0.75,
+        "error_code_counts": {
+          "GUARANTEED_RETURN": 1,
+          "KYC_MISMATCH": 1,
+          "PRIVACY_OVERREACH": 1
+        }
+      },
+      "candidate": {
+        "sample_size": 8,
+        "passed_count": 8,
+        "pass_rate": 1.0,
+        "average_score": 100.0,
+        "evidence_coverage": 1.0,
+        "error_code_counts": {}
+      },
+      "delta": {
+        "pass_rate_pp": 37.5,
+        "average_score": 12.5,
+        "evidence_coverage_pp": 25.0
+      },
+      "improved_case_count": 3,
+      "regressed_case_count": 0
+    }
+  ],
   "delta": {
-    "pass_rate_pp": 54.55,
-    "average_score": 22.73,
-    "evidence_coverage_pp": 9.09,
+    "pass_rate_pp": 28.12,
+    "average_score": 6.87,
+    "evidence_coverage_pp": 9.38,
     "p95_latency_ms": 230
   },
   "gates": [
     {
       "gate_id": "paired_sample_size",
       "label": "配对样本量",
-      "passed": false,
-      "observed": 11,
+      "passed": true,
+      "observed": 32,
       "threshold": ">=30",
       "hard_blocker": true
     },
@@ -63,15 +193,23 @@
       "gate_id": "pass_rate_improvement",
       "label": "通过率改善",
       "passed": true,
-      "observed": "+54.5pp",
+      "observed": "+28.1pp",
       "threshold": ">=20pp",
       "hard_blocker": false
+    },
+    {
+      "gate_id": "intent_regression",
+      "label": "意图级回归",
+      "passed": true,
+      "observed": "0个意图退化",
+      "threshold": "=0",
+      "hard_blocker": true
     },
     {
       "gate_id": "evidence_coverage",
       "label": "证据核验覆盖",
       "passed": true,
-      "observed": "90.9%",
+      "observed": "100.0%",
       "threshold": ">=80%",
       "hard_blocker": true
     },
@@ -95,9 +233,8 @@
   "decision": {
     "status": "HOLD",
     "reason_codes": [
-      "paired_sample_size",
       "p95_latency"
     ],
-    "summary": "样本量不足且延迟超过门槛，仅允许继续离线验证。"
+    "summary": "P95 延迟未通过，仅允许继续离线验证。"
   }
 }

@@ -1,16 +1,17 @@
 {
   "schema_version": "1.0",
   "summary": {
-    "case_count": 24,
-    "passed_count": 16,
-    "pass_rate": 0.6667,
+    "case_count": 32,
+    "passed_count": 20,
+    "pass_rate": 0.625,
     "error_code_counts": {
       "GUARANTEED_RETURN": 1,
       "KYC_MISMATCH": 1,
-      "MISSING_SOURCE": 2,
-      "NUMERIC_MISMATCH": 1,
+      "MISSING_SOURCE": 3,
+      "NUMERIC_MISMATCH": 2,
       "PERIOD_MISMATCH": 1,
-      "STALE_DATA": 1,
+      "PRIVACY_OVERREACH": 1,
+      "STALE_DATA": 2,
       "UNSUPPORTED_CLAIM": 1
     }
   },
@@ -309,6 +310,116 @@
           "code": "GUARANTEED_RETURN",
           "severity": "critical",
           "message": "Answer contains guaranteed-return language.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": []
+    },
+    {
+      "case_id": "rep-quote-close-07",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "rep-quote-source-error-08",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 90.0,
+      "findings": [
+        {
+          "code": "MISSING_SOURCE",
+          "severity": "medium",
+          "message": "Claim has no cited fact.",
+          "claim_id": "rq8",
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "rep-fin-profit-07",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "rep-fin-number-error-08",
+      "intent": "financial_analysis",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "NUMERIC_MISMATCH",
+          "severity": "high",
+          "message": "Asserted value 28.6 does not match frozen value 18.6.",
+          "claim_id": "rf8",
+          "fact_id": "fact_beta_net_profit_growth"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "rep-news-summary-07",
+      "intent": "news_summary",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-stale-08",
+      "intent": "news_summary",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "STALE_DATA",
+          "severity": "high",
+          "message": "Fact is 25 days old; maximum allowed age is 14.",
+          "claim_id": "rn8",
+          "fact_id": "fact_gamma_announcement"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-balanced-07",
+      "intent": "personalized_explanation",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-privacy-08",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "PRIVACY_OVERREACH",
+          "severity": "high",
+          "message": "Answer used unconsented profile fields: income.",
           "claim_id": null,
           "fact_id": null
         }
