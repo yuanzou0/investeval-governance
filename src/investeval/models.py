@@ -21,6 +21,7 @@ class Severity(str, Enum):
 
 
 class ErrorCode(str, Enum):
+    ANSWER_RELEVANCE_FAILURE = "ANSWER_RELEVANCE_FAILURE"
     NUMERIC_MISMATCH = "NUMERIC_MISMATCH"
     STALE_DATA = "STALE_DATA"
     PERIOD_MISMATCH = "PERIOD_MISMATCH"
@@ -133,9 +134,15 @@ class EvaluationCase:
     recommendation_risk: str | None = None
     used_profile_fields: tuple[str, ...] = ()
     expected_error_codes: tuple[ErrorCode, ...] = ()
+    required_answer_aspects: tuple[str, ...] = ()
+    covered_answer_aspects: tuple[str, ...] = ()
+    minimum_answer_coverage: float = 1.0
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "EvaluationCase":
+        minimum_answer_coverage = float(raw.get("minimum_answer_coverage", 1.0))
+        if not 0.0 <= minimum_answer_coverage <= 1.0:
+            raise ValueError("minimum_answer_coverage must be between 0 and 1")
         return cls(
             case_id=str(raw["case_id"]),
             invariant_group_id=raw.get("invariant_group_id"),
@@ -152,6 +159,9 @@ class EvaluationCase:
             recommendation_risk=raw.get("recommendation_risk"),
             used_profile_fields=tuple(raw.get("used_profile_fields", [])),
             expected_error_codes=tuple(ErrorCode(code) for code in raw.get("expected_error_codes", [])),
+            required_answer_aspects=tuple(str(item) for item in raw.get("required_answer_aspects", [])),
+            covered_answer_aspects=tuple(str(item) for item in raw.get("covered_answer_aspects", [])),
+            minimum_answer_coverage=minimum_answer_coverage,
         )
 
 
@@ -181,6 +191,7 @@ class EvaluationResult:
     score: float
     findings: list[Finding] = field(default_factory=list)
     checked_fact_ids: list[str] = field(default_factory=list)
+    answer_coverage: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -190,5 +201,5 @@ class EvaluationResult:
             "score": self.score,
             "findings": [finding.to_dict() for finding in self.findings],
             "checked_fact_ids": self.checked_fact_ids,
+            "answer_coverage": self.answer_coverage,
         }
-

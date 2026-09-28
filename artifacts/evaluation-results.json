@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
   "summary": {
-    "case_count": 11,
-    "passed_count": 2,
-    "pass_rate": 0.1818,
+    "case_count": 13,
+    "passed_count": 3,
+    "pass_rate": 0.2308,
     "error_code_counts": {
+      "ANSWER_RELEVANCE_FAILURE": 1,
       "FACT_PERSONALIZED": 2,
       "GUARANTEED_RETURN": 1,
       "KYC_MISMATCH": 1,
@@ -24,7 +25,39 @@
       "findings": [],
       "checked_fact_ids": [
         "fact_quote_alpha_close"
-      ]
+      ],
+      "answer_coverage": null
+    },
+    {
+      "case_id": "relevance-partial-answer",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "ANSWER_RELEVANCE_FAILURE",
+          "severity": "high",
+          "message": "Answer covers 50% of required aspects; missing: daily_change_pct.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ],
+      "answer_coverage": 0.5
+    },
+    {
+      "case_id": "relevance-complete-answer",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change",
+        "fact_quote_alpha_close"
+      ],
+      "answer_coverage": 1.0
     },
     {
       "case_id": "quote-wrong-number",
@@ -42,7 +75,8 @@
       ],
       "checked_fact_ids": [
         "fact_quote_alpha_change"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "quote-stale",
@@ -60,7 +94,8 @@
       ],
       "checked_fact_ids": [
         "fact_quote_alpha_close"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "financial-correct",
@@ -70,7 +105,8 @@
       "findings": [],
       "checked_fact_ids": [
         "fact_beta_net_profit_growth"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "financial-period-error",
@@ -88,7 +124,8 @@
       ],
       "checked_fact_ids": [
         "fact_beta_revenue"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "news-missing-source",
@@ -106,7 +143,8 @@
       ],
       "checked_fact_ids": [
         "fact_gamma_announcement"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "personalized-kyc-mismatch",
@@ -124,7 +162,8 @@
       ],
       "checked_fact_ids": [
         "fact_fund_risk"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "compliance-guarantee",
@@ -140,7 +179,8 @@
           "fact_id": null
         }
       ],
-      "checked_fact_ids": []
+      "checked_fact_ids": [],
+      "answer_coverage": null
     },
     {
       "case_id": "privacy-overreach",
@@ -156,7 +196,8 @@
           "fact_id": null
         }
       ],
-      "checked_fact_ids": []
+      "checked_fact_ids": [],
+      "answer_coverage": null
     },
     {
       "case_id": "invariant-conservative",
@@ -174,7 +215,8 @@
       ],
       "checked_fact_ids": [
         "fact_quote_alpha_close"
-      ]
+      ],
+      "answer_coverage": null
     },
     {
       "case_id": "invariant-aggressive",
@@ -199,7 +241,8 @@
       ],
       "checked_fact_ids": [
         "fact_quote_alpha_close"
-      ]
+      ],
+      "answer_coverage": null
     }
   ]
 }

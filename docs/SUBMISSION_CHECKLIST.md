@@ -6,11 +6,14 @@
 - [x] 质量工作台
 - [x] 模型、Prompt和数据版本比较
 - [x] Bad Case归因
+- [x] 答非所问的回答要点覆盖评测
+- [x] 可执行的 Bad Case 改善闭环
 - [x] KYC、合规与隐私边界
 - [x] 用户行为反馈分工
 - [x] 热点上下文检查
 - [x] 上线门控结论
 - [ ] 提交前从目标网络重新打开在线URL
+- [ ] 用评审邮箱授予Web查看权限并用隔离会话验收
 
 Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 
@@ -24,12 +27,13 @@ Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 - [x] 创建候选人可分享的GitHub仓库
 - [x] 确认仓库当前为私有；提交前邀请评审或改为公开
 - [ ] 在干净环境执行README命令
+- [ ] 将评审邮箱添加为GitHub只读协作者并实测
 
 GitHub URL：<https://github.com/yuanzou0/investeval-governance>
 
 ## 测试和证据
 
-- [x] 28项自动测试通过
+- [x] 30项自动测试通过
 - [x] 主链路测试说明
 - [x] 数据与接口异常测试说明
 - [x] 合规和个性化边界测试说明

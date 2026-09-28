@@ -44,6 +44,18 @@ def _evaluate_case(case: EvaluationCase, facts: list[Fact]) -> EvaluationResult:
     findings: list[Finding] = []
     checked: list[str] = []
 
+    answer_coverage: float | None = None
+    if case.required_answer_aspects:
+        required = set(case.required_answer_aspects)
+        covered = set(case.covered_answer_aspects)
+        answer_coverage = len(required & covered) / len(required)
+        if answer_coverage < case.minimum_answer_coverage:
+            missing = sorted(required - covered)
+            _append_once(findings, Finding(
+                ErrorCode.ANSWER_RELEVANCE_FAILURE, Severity.HIGH,
+                f"Answer covers {answer_coverage:.0%} of required aspects; missing: {', '.join(missing)}.",
+            ))
+
     for claim in case.claims:
         fact = by_id.get(claim.cited_fact_id or "")
         if claim.cited_fact_id is None:
@@ -120,7 +132,15 @@ def _evaluate_case(case: EvaluationCase, facts: list[Fact]) -> EvaluationResult:
         Severity.CRITICAL: 50,
     }
     score = max(0.0, 100.0 - sum(penalty[item.severity] for item in findings))
-    return EvaluationResult(case.case_id, case.intent, not findings, score, findings, sorted(set(checked)))
+    return EvaluationResult(
+        case.case_id,
+        case.intent,
+        not findings,
+        score,
+        findings,
+        sorted(set(checked)),
+        answer_coverage,
+    )
 
 
 def _add_invariant_findings(cases: list[EvaluationCase], results: dict[str, EvaluationResult]) -> None:

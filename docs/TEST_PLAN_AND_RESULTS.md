@@ -23,7 +23,7 @@
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-结果：**28项通过，0项失败**。
+结果：**30项通过，0项失败**。
 
 ### 主链路
 
@@ -31,7 +31,9 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 |---|---|---|
 | 四类问答意图加载 | 行情、财务、公告和个性化意图均存在 | PASS |
 | 场景分层评测集 | 32条、四类意图各8条、Baseline 20条通过 | PASS |
-| 预期错误标签复现 | 11条案例的预期错误码与实际结果一致 | PASS |
+| 预期错误标签复现 | 13条案例的预期错误码与实际结果一致 | PASS |
+| 答非所问 | 必需要点覆盖50%时输出 `ANSWER_RELEVANCE_FAILURE` | PASS |
+| 改善闭环 | 同一问题的Prompt v1失败、v2通过，并保留归因、事实ID和输入哈希 | PASS |
 | 正常案例 | 正常行情与财务案例通过且得分100 | PASS |
 | Bad Case筛选 | 返回数量与汇总中的Bad Case数量一致 | PASS |
 | 案例详情 | 包含Finding、事实ID和版本血缘 | PASS |
@@ -84,6 +86,7 @@ PYTHONPATH=src python3 -m investeval.cli evaluate \
   --output artifacts/representative-evaluation-results.json
 PYTHONPATH=src python3 -m investeval.cli compare
 PYTHONPATH=src python3 -m investeval.cli signals
+PYTHONPATH=src python3 -m investeval.cli improve
 ```
 
 对应证据：
@@ -92,6 +95,7 @@ PYTHONPATH=src python3 -m investeval.cli signals
 - `artifacts/representative-evaluation-results.json`
 - `artifacts/version-comparison.json`
 - `artifacts/signals-context-summary.json`
+- `artifacts/improvement-loop-results.json`
 
 ## Web检查
 
@@ -100,20 +104,20 @@ PYTHONPATH=src python3 -m investeval.cli signals
 - HTML可以解析；
 - JavaScript语法检查通过；
 - 页面和全部运行时数据文件均返回HTTP 200；
-- 质量工作台、版本对比、反馈与热点三个导航入口可用；
+- 质量工作台、版本对比、反馈热点、改善闭环和评审访问五个导航入口可用；
 - 案例筛选、详情、导入和人工复核操作可执行；
 - 私有部署状态为成功。
 
 ## 未覆盖测试
 
 - 扶摇或iFinD真实接口的成功、超时、限流、鉴权失败和字段漂移；
-- 真实LLM的意图识别与Claim抽取质量；
+- 真实LLM的意图识别、必需要点抽取与Claim抽取质量；
 - 独立人工标注集上的准确率、召回率和一致性；
 - 多用户并发复核、权限隔离和审计日志；
 - 生产负载、长期稳定性、灾备和浏览器兼容矩阵；
 - 真实个人信息的脱敏和数据生命周期。
 
-这些缺口属于上线前验证范围，不应被当前28项测试掩盖。
+这些缺口属于上线前验证范围，不应被当前30项测试掩盖。
 
 ## 最终测试结论
 

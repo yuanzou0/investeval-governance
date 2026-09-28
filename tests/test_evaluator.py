@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from investeval.evaluator import evaluate_cases
+from investeval.improvement import load_and_run
 from investeval.loader import load_cases, load_facts
 
 
@@ -29,10 +30,15 @@ class EvaluationFixtureTests(unittest.TestCase):
                 self.assertEqual(set(case.expected_error_codes), actual)
 
     def test_correct_cases_pass_with_full_score(self) -> None:
-        for case_id in ("quote-correct", "financial-correct"):
+        for case_id in ("quote-correct", "financial-correct", "relevance-complete-answer"):
             result = self.results[case_id]
             self.assertTrue(result.passed)
             self.assertEqual(100.0, result.score)
+
+    def test_partial_answer_is_detected_as_relevance_failure(self) -> None:
+        result = self.results["relevance-partial-answer"]
+        self.assertEqual(0.5, result.answer_coverage)
+        self.assertIn("ANSWER_RELEVANCE_FAILURE", {finding.code.value for finding in result.findings})
 
     def test_invariant_change_is_detected_for_both_profiles(self) -> None:
         for case_id in ("invariant-conservative", "invariant-aggressive"):
@@ -92,6 +98,18 @@ class LoaderValidationTests(unittest.TestCase):
             path.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "source_locator"):
                 load_facts(path)
+
+
+class ImprovementLoopTests(unittest.TestCase):
+    def test_executable_loop_removes_confirmed_relevance_failure(self) -> None:
+        facts = load_facts(ROOT / "data" / "facts.json")
+        payload = load_and_run(ROOT / "data" / "improvement-loop.json", facts)
+        self.assertEqual("VERIFIED", payload["verification"]["status"])
+        self.assertFalse(payload["baseline"]["result"]["passed"])
+        self.assertTrue(payload["candidate"]["result"]["passed"])
+        self.assertEqual(["ANSWER_RELEVANCE_FAILURE"], payload["verification"]["removed_error_codes"])
+        self.assertEqual(1.0, payload["verification"]["candidate_answer_coverage"])
+        self.assertEqual(2, len(payload["verification"]["candidate_checked_fact_ids"]))
 
 
 if __name__ == "__main__":

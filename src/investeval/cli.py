@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .evaluator import evaluate_cases
 from .governance import GovernanceService
+from .improvement import load_and_run
 from .loader import load_cases, load_facts
 from .rollout import load_and_compare
 from .signals import load_signal_summary
@@ -69,6 +70,15 @@ def _signals(args: argparse.Namespace) -> int:
     return 0
 
 
+def _improve(args: argparse.Namespace) -> int:
+    payload = load_and_run(args.loop, load_facts(args.facts))
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(payload["verification"], ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="investeval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -95,6 +105,11 @@ def main() -> int:
     signals.add_argument("--candidate-hot-context", default="data/hot-context-candidate.json")
     signals.add_argument("--output", default="artifacts/signals-context-summary.json")
     signals.set_defaults(func=_signals)
+    improve = subparsers.add_parser("improve")
+    improve.add_argument("--facts", default="data/facts.json")
+    improve.add_argument("--loop", default="data/improvement-loop.json")
+    improve.add_argument("--output", default="artifacts/improvement-loop-results.json")
+    improve.set_defaults(func=_improve)
     args = parser.parse_args()
     return args.func(args)
 

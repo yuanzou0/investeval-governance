@@ -8,7 +8,7 @@ InvestEval 是一个面向投资问答 Agent 的质量治理原型。它将匿�
 
 - Web 产品：<https://investeval-governance.gao44y.chatgpt.site>
 - 当前访问范围：私有
-- 页面：质量工作台、版本对比与上线门控
+- 页面：质量工作台、版本对比与上线门控、反馈热点、改善闭环、评审访问
 
 ## 目标用户
 
@@ -28,7 +28,7 @@ InvestEval 是一个面向投资问答 Agent 的质量治理原型。它将匿�
 ```text
 匿名问答日志
     ↓
-回答意图与评测标准
+回答意图、必需要点与评测标准
     ↓
 确定性事实核验 + KYC / 合规 / 隐私检查
     ↓
@@ -45,7 +45,7 @@ Bad Case 分类与证据血缘
 
 | 意图 | 核心质量标准 | 当前可计算指标 |
 |---|---|---|
-| 行情查询 | 标的、数值、日期和新鲜度正确 | 数值一致性、数据年龄、来源覆盖 |
+| 行情查询 | 必需要点覆盖，且标的、数值、日期和新鲜度正确 | 回答要点覆盖率、数值一致性、数据年龄、来源覆盖 |
 | 财务分析 | 指标、单位和报告期一致 | 数值一致性、报告期一致性、证据覆盖 |
 | 新闻或公告总结 | 来源存在、时间有效、结论受证据支持 | 来源缺失、数据年龄、无证据主张 |
 | 个性化投资解释 | 客观事实不变、风险适配、画像使用有授权 | KYC 失配、事实个性化、隐私越界、收益承诺 |
@@ -65,6 +65,7 @@ Bad Case 分类与证据血缘
 
 | 错误码 | 含义 |
 |---|---|
+| `ANSWER_RELEVANCE_FAILURE` | 回答未覆盖问句声明的必需要点，包括部分作答和答非所问 |
 | `NUMERIC_MISMATCH` | 回答数字与冻结事实不一致 |
 | `STALE_DATA` | 数据超过当前意图允许的新鲜度 |
 | `PERIOD_MISMATCH` | 回答报告期与事实报告期不一致 |
@@ -92,9 +93,10 @@ Bad Case 分类与证据血缘
 当前仓库仅包含匿名合成数据：
 
 - `data/facts.json`：6 条冻结金融事实；
-- `data/cases.json`：11 条高异常密度的压力回归案例，覆盖 4 类意图；
+- `data/cases.json`：13 条高异常密度的压力回归案例，覆盖 4 类意图与答非所问；
 - `data/representative-cases.json`：32 条场景分层案例，4 类意图各 8 条；
 - `data/version-runs.json`：同一批案例的 Baseline 和 Candidate 配对结果；
+- `data/improvement-loop.json`：同一问题的 Baseline/Candidate 结构化输入、人工归因与 Prompt 修复记录；
 - `data/user-feedback.json`、`data/user-feedback-candidate.json`：16组配对匿名合成行为观察；
 - `data/hot-context.json`、`data/hot-context-candidate.json`：4组配对热点时间一致性检查；
 - `fixture://`：明确表示本地合成来源，不冒充真实外部链接。
@@ -108,22 +110,22 @@ Bad Case 分类与证据血缘
 | 数据集 | 设计 | 用途 | 不可用于 |
 |---|---|---|---|
 | 场景分层集 `representative-synthetic-v2` | 32条；4类意图各8条；每类5条正常、3条异常 | 提供版本配对比较，并检查主要工作场景是否均被覆盖 | 推断真实线上流量分布或生产准确率 |
-| Bad Case压力集 | 11条；刻意提高事实、KYC、合规和隐私异常密度 | 回归错误码、人工复核与证据链，比较修复是否退化 | 作为日常问答通过率的无偏估计 |
+| Bad Case压力集 | 13条；刻意提高答非所问、事实、KYC、合规和隐私异常密度 | 回归错误码、人工复核与证据链，比较修复是否退化 | 作为日常问答通过率的无偏估计 |
 
 场景分层 Baseline 的 20/32 条通过、62.5% 通过率来自预先声明的 5:3 设计比例，不是观察真实用户流量后得到的模型性能。它的“代表性”只表示四类核心意图获得等量覆盖。未来获得合规的真实匿名分布后，应先冻结抽样协议和分层权重，再建立独立标注集；不能根据想要的通过率反向挑选案例。
 
 ## 指标解释
 
 - **场景分层 Baseline 通过率 62.5%**：32 条中有 20 条按确定性规则通过。该数字由场景覆盖设计产生，只用于合成基线验证。
-- **Bad Case 压力集通过率 18.2%**：11 条压力测试案例中有 2 条正常回答、9 条预设异常。这是高难度回归集的质量，不是日常回答通过率，也不是评测器准确率。
-- **预期标签复现率 100%**：当前确定性规则在 11 条合成样例上复现了 11/11 条预期标签。样本量很小，不能解释为真实线上准确率。
-- **待复核 9 条**：自动评测发现的 9 条 Bad Case 初始进入人工队列，不表示已有 9 条生产事故。
+- **Bad Case 压力集通过率 23.1%**：13 条压力测试案例中有 3 条正常回答、10 条预设异常。这是高难度回归集的质量，不是日常回答通过率，也不是评测器准确率。
+- **预期标签复现率 100%**：当前确定性规则在 13 条合成样例上复现了 13/13 条预期标签。样本量很小，不能解释为真实线上准确率。
+- **待复核 10 条**：自动评测发现的 10 条 Bad Case 初始进入人工队列，不表示已有 10 条生产事故。
 - **证据核验覆盖率**：至少检查过一条冻结事实的案例占比。
 - **质量分**：从 100 分开始，根据中、高、严重等级问题扣分。它用于排序和比较，不代替错误明细。
 
 ## 版本对比与上线门控
 
-当前 Baseline 和 Candidate 使用完全相同的 32 个场景分层 `case_id` 与意图标签，避免因样本变化产生不可比结果。原 11 条压力集继续独立承担错误码和人工复核回归，不与版本指标混算。
+当前 Baseline 和 Candidate 使用完全相同的 32 个场景分层 `case_id` 与意图标签，避免因样本变化产生不可比结果。13 条压力集继续独立承担答非所问、错误码和人工复核回归，不与版本指标混算。
 
 | 指标 | Baseline | Candidate | 变化 |
 |---|---:|---:|---:|
@@ -138,6 +140,25 @@ Bad Case 分类与证据血缘
 `rollout-policy-v2` 要求：配对样本量不少于 30、通过率至少改善 20 个百分点、任何意图不得退化、证据覆盖不低于 80%、阻断类错误为 0、P95 延迟不高于 800ms。
 
 Candidate 的总体和各意图质量指标均改善，32 条样本量门槛已通过；但 P95 延迟为 840ms，因此决策保持 **HOLD**，只允许继续离线验证，不允许生产发布或效果宣称。完整证据位于 `artifacts/version-comparison.json`。
+
+## 可执行的改善闭环
+
+`remediation-relevance-001` 用同一用户问题、同一冻结事实和同一评测器执行一次完整修复：
+
+```text
+Prompt v1 只回答收盘价（必需要点覆盖 50%）
+    → ANSWER_RELEVANCE_FAILURE
+    → 人工复核确认：prompt_coverage_contract_missing
+    → Prompt v2 增加“逐项覆盖问句必需要点”合同
+    → Candidate 覆盖收盘价与涨跌幅（覆盖 100%，核验 2 条事实）
+    → 单例修复 VERIFIED，整体版本仍因 P95 延迟保持 HOLD
+```
+
+Baseline/Candidate 输入位于 `data/improvement-loop.json`，执行结果、被移除错误码、事实 ID 和输入 SHA-256 位于 `artifacts/improvement-loop-results.json`。这是可复现的合成修复证据，不是真实线上 A/B。
+
+## 评审访问
+
+Web 产品和 GitHub 仓库当前保持私有。提交前需将评审方指定邮箱添加到两个项目，并使用新浏览器会话验证 Web 查看、仓库只读、Bad Case 筛选和证据查看。在未取得评审邮箱前，项目只声明“待授权”，不伪造“已可访问”状态。完整流程见 [`docs/REVIEWER_ACCESS.md`](docs/REVIEWER_ACCESS.md)。
 
 ## AI 在产品中的角色
 
@@ -154,6 +175,7 @@ dist/                         静态可操作 Web 产品
 data/                         冻结事实、问答案例和配对版本输入
 src/investeval/models.py      类型化数据合同
 src/investeval/evaluator.py   事实、KYC、合规和隐私评测
+src/investeval/improvement.py 执行 Baseline→归因→Candidate 修复证据
 src/investeval/governance.py  导入、筛选、详情和人工复核服务
 src/investeval/rollout.py     配对版本比较和上线门控
 src/investeval/signals.py     用户行为聚合和热点时间检查
@@ -197,6 +219,12 @@ PYTHONPATH=src python3 -m investeval.cli signals \
   --candidate-hot-context data/hot-context-candidate.json \
   --output artifacts/signals-context-summary.json
 
+# 重放一条 Bad Case 的完整改善闭环
+PYTHONPATH=src python3 -m investeval.cli improve \
+  --facts data/facts.json \
+  --loop data/improvement-loop.json \
+  --output artifacts/improvement-loop-results.json
+
 # 启动治理 API
 PYTHONPATH=src python3 -m investeval.cli serve --port 8000
 
@@ -220,7 +248,7 @@ python3 -m http.server 8790 --directory dist
 
 ## 测试与验证
 
-当前包含 28 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号 Baseline/Candidate 对比及热点时间检查。
+当前包含 30 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、回答要点覆盖与答非所问、可执行修复闭环、预期错误标签复现、事实个性化、数据来源协议、人工复核、配对一致性、上线门控、行为信号对比及热点时间检查。
 
 已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及私有部署成功状态检查。
 
@@ -230,7 +258,7 @@ python3 -m http.server 8790 --directory dist
 
 - 没有连接扶摇、iFinD 或其他实时金融数据接口；
 - 没有自然语言 Claim 提取模型，当前 Claim 已结构化；
-- 没有答非所问的语义相关性模型；
+- 当前答非所问依赖上游声明的 `required_answer_aspects` 与结构化覆盖结果，尚未实现开放语义的自动要点提取；
 - 热点上下文目前只检查时效、未来信息泄漏和事件日期错配，尚未检测新闻重要信息遗漏；
 - 用户行为目前来自合成离线日志，尚未接入真实线上埋点；
 - 当前正则规则不能覆盖所有合规表达及其上下文；

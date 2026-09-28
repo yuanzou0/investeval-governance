@@ -5,6 +5,7 @@ const labels = {
   financial_analysis: "财务分析",
   news_summary: "公告摘要",
   personalized_explanation: "个性化解释",
+  ANSWER_RELEVANCE_FAILURE: "答非所问",
   NUMERIC_MISMATCH: "数字错误",
   STALE_DATA: "数据过期",
   PERIOD_MISMATCH: "报告期错误",
@@ -27,7 +28,7 @@ const labels = {
   not_required: "无需复核"
 };
 
-const state = { cases: [], facts: [], results: [], representative: null, comparison: null, signals: null, selectedId: null, imported: [] };
+const state = { cases: [], facts: [], results: [], representative: null, comparison: null, signals: null, improvement: null, selectedId: null, imported: [] };
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -45,15 +46,16 @@ function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JS
 
 async function loadData() {
   $("#load-status").textContent = "载入中";
-  const [caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse] = await Promise.all([
+  const [caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse, improvementResponse] = await Promise.all([
     fetch("data/cases.json", { cache: "no-store" }),
     fetch("data/facts.json", { cache: "no-store" }),
     fetch("data/evaluation-results.json", { cache: "no-store" }),
     fetch("data/representative-evaluation-results.json", { cache: "no-store" }),
     fetch("data/version-comparison.json", { cache: "no-store" }),
-    fetch("data/signals-context-summary.json", { cache: "no-store" })
+    fetch("data/signals-context-summary.json", { cache: "no-store" }),
+    fetch("data/improvement-loop-results.json", { cache: "no-store" })
   ]);
-  if (![caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse].every((response) => response.ok)) {
+  if (![caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse, improvementResponse].every((response) => response.ok)) {
     throw new Error("冻结评测数据载入失败");
   }
   state.cases = (await caseResponse.json()).cases;
@@ -62,6 +64,7 @@ async function loadData() {
   state.representative = await representativeResponse.json();
   state.comparison = await comparisonResponse.json();
   state.signals = await signalsResponse.json();
+  state.improvement = await improvementResponse.json();
   state.selectedId = null;
   populateFilters();
   render();
@@ -130,7 +133,7 @@ function renderMetrics(items) {
   $("#representative-pass-rate").textContent = representative ? `${(representative.pass_rate * 100).toFixed(1)}%` : "—";
   $("#representative-pass-count").textContent = representative ? `${representative.passed_count} / ${representative.case_count} 条通过` : "—";
   $("#pass-rate").textContent = items.length ? `${(passed / items.length * 100).toFixed(1)}%` : "—";
-  $("#pass-count").textContent = `${passed} / ${items.length} 条通过 · 标签复现 11/11`;
+  $("#pass-count").textContent = `${passed} / ${items.length} 条通过 · 标签复现 ${state.cases.length}/${state.cases.length}`;
   $("#pending-count").textContent = String(pendingItems.length);
   $("#severity-breakdown").textContent = `Critical ${severityCounts.critical} · High ${severityCounts.high} · Medium ${severityCounts.medium}`;
   $("#evidence-rate").textContent = items.length ? `${Math.round(verified / items.length * 100)}%` : "—";
@@ -221,6 +224,30 @@ function renderSignals() {
   }).join("");
 }
 
+function renderImprovement() {
+  const loop = state.improvement;
+  if (!loop) return;
+  const baseline = loop.baseline;
+  const candidate = loop.candidate;
+  const verification = loop.verification;
+  const baselineFinding = baseline.result.findings[0];
+  $("#loop-status").textContent = verification.status === "VERIFIED" ? "VERIFIED · 已验证" : "NOT VERIFIED";
+  $("#loop-id").textContent = loop.loop_id;
+  $("#loop-baseline-score").textContent = `${baseline.result.score.toFixed(0)} 分 · 覆盖 ${(baseline.result.answer_coverage * 100).toFixed(0)}%`;
+  $("#loop-baseline-finding").textContent = baselineFinding ? `${labels[baselineFinding.code] || baselineFinding.code}：${baselineFinding.message}` : "未发现问题";
+  $("#loop-root-cause").textContent = `${loop.investigation.root_cause}；${loop.investigation.note}`;
+  $("#loop-version-change").textContent = `${loop.intervention.from_version} → ${loop.intervention.to_version}`;
+  $("#loop-intervention").textContent = loop.intervention.change;
+  $("#loop-candidate-score").textContent = `${candidate.result.score.toFixed(0)} 分 · 覆盖 ${(candidate.result.answer_coverage * 100).toFixed(0)}%`;
+  $("#loop-verification").textContent = `移除 ${verification.removed_error_codes.map((code) => labels[code] || code).join("、")} · 核验 ${verification.candidate_checked_fact_ids.length} 条事实 · ${verification.regression_scope}`;
+  $("#loop-rollout").textContent = verification.rollout_decision;
+  $("#loop-question").textContent = loop.question;
+  $("#loop-baseline-answer").textContent = baseline.answer;
+  $("#loop-candidate-answer").textContent = candidate.answer;
+  $("#loop-baseline-hash").textContent = `input sha256 ${baseline.input_sha256.slice(0, 16)}…`;
+  $("#loop-candidate-hash").textContent = `input sha256 ${candidate.input_sha256.slice(0, 16)}…`;
+}
+
 function renderTable(items) {
   const filtered = filteredCases();
   $("#result-count").textContent = `${filtered.length} 条`;
@@ -259,6 +286,7 @@ function renderDetail(items) {
     <p>${escapeHtml(finding.message)}</p>
   </div>`).join("") : '<span class="badge ok">未发现确定性问题</span>';
   const checked = item.result.checked_fact_ids.length ? item.result.checked_fact_ids.join(", ") : "未核验事实";
+  const coverage = item.result.answer_coverage == null ? "未声明覆盖合同" : `${(item.result.answer_coverage * 100).toFixed(0)}%`;
   const kyc = item.kyc ? `${item.kyc.risk_level} · ${item.kyc.horizon} · ${item.kyc.experience}` : "无画像";
   const reviewSection = item.result.passed
     ? '<section class="detail-section"><h3>人工复核</h3><span class="badge ok">无需复核</span><p>自动评测未发现确定性问题；如用户举报或抽检命中，可重新进入人工队列。</p></section>'
@@ -274,6 +302,7 @@ function renderDetail(items) {
     <section class="detail-section"><h3>证据与版本血缘</h3><div class="lineage">
       <div><span>MODEL</span><strong>${escapeHtml(item.model_version)}</strong></div><div><span>PROMPT</span><strong>${escapeHtml(item.prompt_version)}</strong></div>
       <div><span>DATA</span><strong>${escapeHtml(item.data_version)}</strong></div><div><span>KYC</span><strong>${escapeHtml(kyc)}</strong></div>
+      <div style="grid-column:1/-1"><span>ANSWER COVERAGE</span><strong>${escapeHtml(coverage)}</strong></div>
       <div style="grid-column:1/-1"><span>CHECKED FACTS</span><strong>${escapeHtml(checked)}</strong></div>
     </div></section>
     ${reviewSection}`;
@@ -294,6 +323,7 @@ function render() {
   renderDetail(items);
   renderComparison();
   renderSignals();
+  renderImprovement();
 }
 
 function showToast(message) {

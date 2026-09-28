@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "loop_id": "remediation-relevance-001",
+  "dataset_kind": "synthetic_executable_remediation_evidence",
+  "evidence_boundary": "The Baseline and Candidate are synthetic structured Agent outputs. Both are executed by the same deterministic evaluator; this is reproducible remediation evidence, not a production A/B result.",
+  "case_id": "relevance-loop-01",
+  "question": "ALPHA昨天收盘价和涨跌幅分别是多少？",
+  "baseline": {
+    "answer": "截至2026-09-26，ALPHA收盘价为12.50元。",
+    "model_version": "agent-a",
+    "prompt_version": "prompt-v1",
+    "data_version": "market-v1",
+    "result": {
+      "case_id": "relevance-loop-01",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "ANSWER_RELEVANCE_FAILURE",
+          "severity": "high",
+          "message": "Answer covers 50% of required aspects; missing: daily_change_pct.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ],
+      "answer_coverage": 0.5
+    },
+    "input_sha256": "9495fc8e8ef5a1e95d5bde9d1b325483add5ccbb3c05502fc401f0a857183777"
+  },
+  "investigation": {
+    "human_review_status": "confirmed",
+    "reviewer": "reviewer-a",
+    "root_cause": "prompt_coverage_contract_missing",
+    "note": "回答数字正确，但只覆盖了收盘价，漏掉用户同句要求的涨跌幅。"
+  },
+  "intervention": {
+    "owner": "prompt-engineering",
+    "change_type": "prompt",
+    "from_version": "prompt-v1",
+    "to_version": "prompt-v2",
+    "change": "增加回答前覆盖检查：逐一回答用户问句中的每个必需方面，未取得证据时明确拒答。",
+    "changed_artifact": "required-aspect coverage contract"
+  },
+  "candidate": {
+    "answer": "截至2026-09-26，ALPHA收盘价为12.50元，当日涨幅2.04%。",
+    "model_version": "agent-a",
+    "prompt_version": "prompt-v2",
+    "data_version": "market-v1",
+    "result": {
+      "case_id": "relevance-loop-01",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change",
+        "fact_quote_alpha_close"
+      ],
+      "answer_coverage": 1.0
+    },
+    "input_sha256": "453638a51d60b8c8f01815cf7dabf7e990b024988e9f45c3ce528c156dc4d0ab"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "baseline_passed": false,
+    "candidate_passed": true,
+    "score_delta": 25.0,
+    "removed_error_codes": [
+      "ANSWER_RELEVANCE_FAILURE"
+    ],
+    "candidate_checked_fact_ids": [
+      "fact_quote_alpha_change",
+      "fact_quote_alpha_close"
+    ],
+    "candidate_answer_coverage": 1.0,
+    "regression_scope": "13-case pressure regression + 32-case paired intent suite",
+    "rollout_decision": "HOLD: remediation is verified, but the Candidate release remains blocked by the 840ms P95 latency gate."
+  }
+}

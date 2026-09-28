@@ -22,6 +22,57 @@
       "expected_error_codes": []
     },
     {
+      "case_id": "relevance-partial-answer",
+      "invariant_group_id": null,
+      "intent": "market_quote",
+      "question": "ALPHA昨天收盘价和涨跌幅分别是多少？",
+      "answer": "截至2026-09-26，ALPHA收盘价为12.50元。",
+      "evaluation_date": "2026-09-27",
+      "max_age_days": 3,
+      "model_version": "agent-a",
+      "prompt_version": "prompt-v1",
+      "data_version": "market-v1",
+      "kyc": null,
+      "required_answer_aspects": ["close_price", "daily_change_pct"],
+      "covered_answer_aspects": ["close_price"],
+      "minimum_answer_coverage": 1.0,
+      "claims": [{
+        "claim_id": "c-relevance-1", "entity_id": "ALPHA.SH", "metric": "close_price",
+        "asserted_value": 12.5, "unit": "CNY", "asserted_as_of": "2026-09-26",
+        "asserted_period": "2026-09-26", "cited_fact_id": "fact_quote_alpha_close", "tolerance": 0.001
+      }],
+      "expected_error_codes": ["ANSWER_RELEVANCE_FAILURE"]
+    },
+    {
+      "case_id": "relevance-complete-answer",
+      "invariant_group_id": null,
+      "intent": "market_quote",
+      "question": "ALPHA昨天收盘价和涨跌幅分别是多少？",
+      "answer": "截至2026-09-26，ALPHA收盘价为12.50元，当日涨幅2.04%。",
+      "evaluation_date": "2026-09-27",
+      "max_age_days": 3,
+      "model_version": "agent-a",
+      "prompt_version": "prompt-v2",
+      "data_version": "market-v1",
+      "kyc": null,
+      "required_answer_aspects": ["close_price", "daily_change_pct"],
+      "covered_answer_aspects": ["close_price", "daily_change_pct"],
+      "minimum_answer_coverage": 1.0,
+      "claims": [
+        {
+          "claim_id": "c-relevance-2a", "entity_id": "ALPHA.SH", "metric": "close_price",
+          "asserted_value": 12.5, "unit": "CNY", "asserted_as_of": "2026-09-26",
+          "asserted_period": "2026-09-26", "cited_fact_id": "fact_quote_alpha_close", "tolerance": 0.001
+        },
+        {
+          "claim_id": "c-relevance-2b", "entity_id": "ALPHA.SH", "metric": "daily_change_pct",
+          "asserted_value": 2.04, "unit": "percent", "asserted_as_of": "2026-09-26",
+          "asserted_period": "2026-09-26", "cited_fact_id": "fact_quote_alpha_change", "tolerance": 0.001
+        }
+      ],
+      "expected_error_codes": []
+    },
+    {
       "case_id": "quote-wrong-number",
       "invariant_group_id": null,
       "intent": "market_quote",
@@ -217,4 +268,3 @@
     }
   ]
 }
-
