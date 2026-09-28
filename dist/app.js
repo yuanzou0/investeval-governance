@@ -188,13 +188,14 @@ function renderSignals() {
   const resultMap = new Map(state.results.map((result) => [result.case_id, result]));
   const candidateCaseMap = new Map(candidateFeedback.cases.map((item) => [item.case_id, item]));
   const candidateHotMap = new Map(candidateHot.results.map((item) => [item.check_id, item]));
-  $("#feedback-event-count").textContent = `${baselineFeedback.event_count} / ${candidateFeedback.event_count}`;
-  $("#negative-rate").textContent = `${(baselineFeedback.negative_signal_rate * 100).toFixed(0)}% → ${(candidateFeedback.negative_signal_rate * 100).toFixed(0)}%`;
-  $("#negative-count").textContent = `${delta.negative_signal_rate_pp.toFixed(0)}pp · ${baselineFeedback.negative_signal_count} → ${candidateFeedback.negative_signal_count} 个`;
-  $("#escalated-count").textContent = `${baselineFeedback.escalated_case_count} → ${candidateFeedback.escalated_case_count}`;
-  $("#escalated-delta").textContent = `${delta.escalated_case_count} 个 · 举报或至少2个负向信号`;
-  $("#hot-failed-count").textContent = `${baselineHot.failed_count} → ${candidateHot.failed_count}`;
-  $("#hot-pass-count").textContent = `${delta.hot_context_failed_count} 个 · Candidate ${candidateHot.passed_count}/${candidateHot.check_count} 通过`;
+  $("#feedback-event-count").textContent = String(candidateFeedback.event_count);
+  $("#feedback-baseline").textContent = `Baseline 同为 ${baselineFeedback.event_count} 条配对观察`;
+  $("#negative-rate").textContent = `${(candidateFeedback.negative_signal_rate * 100).toFixed(0)}%`;
+  $("#negative-count").textContent = `Baseline ${(baselineFeedback.negative_signal_rate * 100).toFixed(0)}% · 改善 ${Math.abs(delta.negative_signal_rate_pp).toFixed(0)}pp`;
+  $("#escalated-count").textContent = String(candidateFeedback.escalated_case_count);
+  $("#escalated-delta").textContent = `Baseline ${baselineFeedback.escalated_case_count} 个 · 减少 ${Math.abs(delta.escalated_case_count)} 个`;
+  $("#hot-failed-count").textContent = String(candidateHot.failed_count);
+  $("#hot-pass-count").textContent = `Baseline ${baselineHot.failed_count} 个 · Candidate ${candidateHot.passed_count}/${candidateHot.check_count} 通过`;
   $("#feedback-case-count").textContent = `${baselineFeedback.cases.length} 个案例`;
   $("#hot-check-count").textContent = `${baselineHot.check_count} 组配对`;
   $("#feedback-table-body").innerHTML = baselineFeedback.cases.map((item) => {
@@ -213,8 +214,8 @@ function renderSignals() {
   $("#hot-context-list").innerHTML = baselineHot.results.map((item) => {
     const candidateItem = candidateHotMap.get(item.check_id);
     return `<div class="hot-row">
-    <div class="hot-row-head"><strong>${escapeHtml(item.check_id)}</strong><div class="status-flow"><span class="badge ${item.passed ? "ok" : "error"}">B ${item.passed ? "PASS" : "FAIL"}</span><span>→</span><span class="badge ${candidateItem?.passed ? "ok" : "error"}">C ${candidateItem?.passed ? "PASS" : "FAIL"}</span></div></div>
-    <p>案例 ${escapeHtml(item.case_id)} · 来源年龄 B ${item.age_hours}h → C ${candidateItem?.age_hours ?? "—"}h · 上限 ${item.maximum_age_hours}h</p>
+    <div class="hot-row-head"><strong>${escapeHtml(item.check_id)}</strong><div class="status-flow"><span class="badge ${item.passed ? "ok" : "error"}">Baseline ${item.passed ? "PASS" : "FAIL"}</span><span class="badge ${candidateItem?.passed ? "ok" : "error"}">Candidate ${candidateItem?.passed ? "PASS" : "FAIL"}</span></div></div>
+    <p>案例 ${escapeHtml(item.case_id)} · Baseline 来源年龄 ${item.age_hours}h · Candidate ${candidateItem?.age_hours ?? "—"}h · 上限 ${item.maximum_age_hours}h</p>
     <div class="hot-findings">${item.findings.length ? item.findings.map((code) => `<span class="badge error">${escapeHtml(labels[code] || code)}</span>`).join("") : '<span class="badge ok">Baseline 时间一致</span>'}</div>
   </div>`;
   }).join("");
@@ -308,6 +309,7 @@ function showLoadFailure(error) {
     $(selector).textContent = "载入失败";
   });
   $("#negative-count").textContent = "未取得行为数据";
+  $("#feedback-baseline").textContent = "未取得行为数据";
   $("#escalated-delta").textContent = "未取得行为数据";
   $("#hot-pass-count").textContent = "未取得热点数据";
   showToast(`数据载入失败：${error.message}`);
