@@ -1,168 +1,344 @@
 {
-  "schema_version": "1.0",
-  "dataset_kind": "synthetic_signal_governance_summary",
-  "feedback": {
-    "event_count": 16,
-    "helpful_count": 4,
-    "negative_signal_count": 12,
-    "negative_signal_rate": 0.75,
-    "report_count": 3,
-    "escalated_case_count": 7,
-    "cases": [
-      {
-        "case_id": "compliance-guarantee",
-        "helpful": 2,
-        "not_helpful": 0,
-        "retry": 0,
-        "report": 0,
-        "negative_signal_count": 0,
-        "escalated": false,
-        "action": "observe"
-      },
-      {
-        "case_id": "financial-correct",
-        "helpful": 0,
-        "not_helpful": 1,
-        "retry": 1,
-        "report": 0,
-        "negative_signal_count": 2,
-        "escalated": true,
-        "action": "quality_investigation"
-      },
-      {
-        "case_id": "financial-period-error",
-        "helpful": 0,
-        "not_helpful": 0,
-        "retry": 0,
-        "report": 1,
-        "negative_signal_count": 1,
-        "escalated": true,
-        "action": "human_review"
-      },
-      {
-        "case_id": "invariant-aggressive",
-        "helpful": 0,
-        "not_helpful": 1,
-        "retry": 1,
-        "report": 0,
-        "negative_signal_count": 2,
-        "escalated": true,
-        "action": "quality_investigation"
-      },
-      {
-        "case_id": "news-missing-source",
-        "helpful": 0,
-        "not_helpful": 1,
-        "retry": 1,
-        "report": 0,
-        "negative_signal_count": 2,
-        "escalated": true,
-        "action": "quality_investigation"
-      },
-      {
-        "case_id": "personalized-kyc-mismatch",
-        "helpful": 0,
-        "not_helpful": 0,
-        "retry": 0,
-        "report": 1,
-        "negative_signal_count": 1,
-        "escalated": true,
-        "action": "human_review"
-      },
-      {
-        "case_id": "privacy-overreach",
-        "helpful": 0,
-        "not_helpful": 0,
-        "retry": 0,
-        "report": 1,
-        "negative_signal_count": 1,
-        "escalated": true,
-        "action": "human_review"
-      },
-      {
-        "case_id": "quote-correct",
-        "helpful": 2,
-        "not_helpful": 0,
-        "retry": 0,
-        "report": 0,
-        "negative_signal_count": 0,
-        "escalated": false,
-        "action": "observe"
-      },
-      {
-        "case_id": "quote-stale",
-        "helpful": 0,
-        "not_helpful": 1,
-        "retry": 0,
-        "report": 0,
-        "negative_signal_count": 1,
-        "escalated": false,
-        "action": "observe"
-      },
-      {
-        "case_id": "quote-wrong-number",
-        "helpful": 0,
-        "not_helpful": 1,
-        "retry": 1,
-        "report": 0,
-        "negative_signal_count": 2,
-        "escalated": true,
-        "action": "quality_investigation"
-      }
-    ],
-    "interpretation_boundary": "Behavior signals prioritize investigation; they never override factual or compliance findings."
+  "schema_version": "2.0",
+  "dataset_kind": "synthetic_paired_signal_governance_summary",
+  "disclaimer": "Synthetic matched observation windows demonstrate the governance workflow; they are not causal or production evidence.",
+  "pairing": {
+    "feedback_observation_count": 16,
+    "hot_context_check_count": 4,
+    "rule": "Feedback uses identical pair IDs and case IDs; hot-context uses identical check IDs and case IDs."
   },
-  "hot_context": {
-    "check_count": 4,
-    "passed_count": 1,
-    "failed_count": 3,
-    "results": [
-      {
-        "check_id": "hot-fresh-announcement",
-        "case_id": "news-missing-source",
-        "question_time": "2026-09-27T10:00:00Z",
-        "source_published_at": "2026-09-27T08:30:00Z",
-        "age_hours": 1.5,
-        "maximum_age_hours": 24,
-        "passed": true,
-        "findings": []
-      },
-      {
-        "check_id": "hot-stale-news",
-        "case_id": "quote-stale",
-        "question_time": "2026-09-27T10:00:00Z",
-        "source_published_at": "2026-09-24T08:00:00Z",
-        "age_hours": 74.0,
-        "maximum_age_hours": 24,
-        "passed": false,
-        "findings": [
-          "HOT_CONTEXT_STALE"
-        ]
-      },
-      {
-        "check_id": "hot-future-leak",
-        "case_id": "financial-period-error",
-        "question_time": "2026-09-27T10:00:00Z",
-        "source_published_at": "2026-09-27T14:00:00Z",
-        "age_hours": -4.0,
-        "maximum_age_hours": 24,
-        "passed": false,
-        "findings": [
-          "FUTURE_CONTEXT_LEAK"
-        ]
-      },
-      {
-        "check_id": "hot-event-date-mismatch",
-        "case_id": "news-missing-source",
-        "question_time": "2026-09-27T10:00:00Z",
-        "source_published_at": "2026-09-27T08:30:00Z",
-        "age_hours": 1.5,
-        "maximum_age_hours": 24,
-        "passed": false,
-        "findings": [
-          "EVENT_TIME_MISMATCH"
-        ]
-      }
-    ]
+  "baseline": {
+    "label": "Baseline",
+    "feedback": {
+      "event_count": 16,
+      "helpful_count": 4,
+      "negative_signal_count": 12,
+      "negative_signal_rate": 0.75,
+      "report_count": 3,
+      "escalated_case_count": 7,
+      "cases": [
+        {
+          "case_id": "compliance-guarantee",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "financial-correct",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 1,
+          "report": 0,
+          "negative_signal_count": 2,
+          "escalated": true,
+          "action": "quality_investigation"
+        },
+        {
+          "case_id": "financial-period-error",
+          "helpful": 0,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 1,
+          "negative_signal_count": 1,
+          "escalated": true,
+          "action": "human_review"
+        },
+        {
+          "case_id": "invariant-aggressive",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 1,
+          "report": 0,
+          "negative_signal_count": 2,
+          "escalated": true,
+          "action": "quality_investigation"
+        },
+        {
+          "case_id": "news-missing-source",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 1,
+          "report": 0,
+          "negative_signal_count": 2,
+          "escalated": true,
+          "action": "quality_investigation"
+        },
+        {
+          "case_id": "personalized-kyc-mismatch",
+          "helpful": 0,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 1,
+          "negative_signal_count": 1,
+          "escalated": true,
+          "action": "human_review"
+        },
+        {
+          "case_id": "privacy-overreach",
+          "helpful": 0,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 1,
+          "negative_signal_count": 1,
+          "escalated": true,
+          "action": "human_review"
+        },
+        {
+          "case_id": "quote-correct",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "quote-stale",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 1,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "quote-wrong-number",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 1,
+          "report": 0,
+          "negative_signal_count": 2,
+          "escalated": true,
+          "action": "quality_investigation"
+        }
+      ],
+      "interpretation_boundary": "Behavior signals prioritize investigation; they never override factual or compliance findings."
+    },
+    "hot_context": {
+      "check_count": 4,
+      "passed_count": 1,
+      "failed_count": 3,
+      "results": [
+        {
+          "check_id": "hot-fresh-announcement",
+          "case_id": "news-missing-source",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T08:30:00Z",
+          "age_hours": 1.5,
+          "maximum_age_hours": 24,
+          "passed": true,
+          "findings": []
+        },
+        {
+          "check_id": "hot-stale-news",
+          "case_id": "quote-stale",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-24T08:00:00Z",
+          "age_hours": 74.0,
+          "maximum_age_hours": 24,
+          "passed": false,
+          "findings": [
+            "HOT_CONTEXT_STALE"
+          ]
+        },
+        {
+          "check_id": "hot-future-leak",
+          "case_id": "financial-period-error",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T14:00:00Z",
+          "age_hours": -4.0,
+          "maximum_age_hours": 24,
+          "passed": false,
+          "findings": [
+            "FUTURE_CONTEXT_LEAK"
+          ]
+        },
+        {
+          "check_id": "hot-event-date-mismatch",
+          "case_id": "news-missing-source",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T08:30:00Z",
+          "age_hours": 1.5,
+          "maximum_age_hours": 24,
+          "passed": false,
+          "findings": [
+            "EVENT_TIME_MISMATCH"
+          ]
+        }
+      ]
+    }
+  },
+  "candidate": {
+    "label": "Candidate",
+    "feedback": {
+      "event_count": 16,
+      "helpful_count": 12,
+      "negative_signal_count": 4,
+      "negative_signal_rate": 0.25,
+      "report_count": 1,
+      "escalated_case_count": 2,
+      "cases": [
+        {
+          "case_id": "compliance-guarantee",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "financial-correct",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "financial-period-error",
+          "helpful": 1,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "invariant-aggressive",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 1,
+          "report": 0,
+          "negative_signal_count": 2,
+          "escalated": true,
+          "action": "quality_investigation"
+        },
+        {
+          "case_id": "news-missing-source",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "personalized-kyc-mismatch",
+          "helpful": 1,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "privacy-overreach",
+          "helpful": 0,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 1,
+          "negative_signal_count": 1,
+          "escalated": true,
+          "action": "human_review"
+        },
+        {
+          "case_id": "quote-correct",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "quote-stale",
+          "helpful": 0,
+          "not_helpful": 1,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 1,
+          "escalated": false,
+          "action": "observe"
+        },
+        {
+          "case_id": "quote-wrong-number",
+          "helpful": 2,
+          "not_helpful": 0,
+          "retry": 0,
+          "report": 0,
+          "negative_signal_count": 0,
+          "escalated": false,
+          "action": "observe"
+        }
+      ],
+      "interpretation_boundary": "Behavior signals prioritize investigation; they never override factual or compliance findings."
+    },
+    "hot_context": {
+      "check_count": 4,
+      "passed_count": 4,
+      "failed_count": 0,
+      "results": [
+        {
+          "check_id": "hot-fresh-announcement",
+          "case_id": "news-missing-source",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T08:30:00Z",
+          "age_hours": 1.5,
+          "maximum_age_hours": 24,
+          "passed": true,
+          "findings": []
+        },
+        {
+          "check_id": "hot-stale-news",
+          "case_id": "quote-stale",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T09:00:00Z",
+          "age_hours": 1.0,
+          "maximum_age_hours": 24,
+          "passed": true,
+          "findings": []
+        },
+        {
+          "check_id": "hot-future-leak",
+          "case_id": "financial-period-error",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T09:15:00Z",
+          "age_hours": 0.75,
+          "maximum_age_hours": 24,
+          "passed": true,
+          "findings": []
+        },
+        {
+          "check_id": "hot-event-date-mismatch",
+          "case_id": "news-missing-source",
+          "question_time": "2026-09-27T10:00:00Z",
+          "source_published_at": "2026-09-27T08:30:00Z",
+          "age_hours": 1.5,
+          "maximum_age_hours": 24,
+          "passed": true,
+          "findings": []
+        }
+      ]
+    }
+  },
+  "delta": {
+    "negative_signal_rate_pp": -50.0,
+    "negative_signal_count": -8,
+    "escalated_case_count": -5,
+    "hot_context_failed_count": -3
   }
 }

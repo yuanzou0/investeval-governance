@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "anonymous_synthetic_behavior_events_candidate",
+  "events": [
+    {"event_id": "fb-c-001", "pair_id": "obs-001", "case_id": "quote-correct", "signal": "helpful", "occurred_at": "2026-09-28T10:01:00Z"},
+    {"event_id": "fb-c-002", "pair_id": "obs-002", "case_id": "quote-correct", "signal": "helpful", "occurred_at": "2026-09-28T10:02:00Z"},
+    {"event_id": "fb-c-003", "pair_id": "obs-003", "case_id": "quote-wrong-number", "signal": "helpful", "occurred_at": "2026-09-28T10:03:00Z"},
+    {"event_id": "fb-c-004", "pair_id": "obs-004", "case_id": "quote-wrong-number", "signal": "helpful", "occurred_at": "2026-09-28T10:04:00Z"},
+    {"event_id": "fb-c-005", "pair_id": "obs-005", "case_id": "quote-stale", "signal": "not_helpful", "occurred_at": "2026-09-28T10:05:00Z"},
+    {"event_id": "fb-c-006", "pair_id": "obs-006", "case_id": "financial-correct", "signal": "helpful", "occurred_at": "2026-09-28T10:06:00Z"},
+    {"event_id": "fb-c-007", "pair_id": "obs-007", "case_id": "financial-correct", "signal": "helpful", "occurred_at": "2026-09-28T10:07:00Z"},
+    {"event_id": "fb-c-008", "pair_id": "obs-008", "case_id": "financial-period-error", "signal": "helpful", "occurred_at": "2026-09-28T10:08:00Z"},
+    {"event_id": "fb-c-009", "pair_id": "obs-009", "case_id": "news-missing-source", "signal": "helpful", "occurred_at": "2026-09-28T10:09:00Z"},
+    {"event_id": "fb-c-010", "pair_id": "obs-010", "case_id": "news-missing-source", "signal": "helpful", "occurred_at": "2026-09-28T10:10:00Z"},
+    {"event_id": "fb-c-011", "pair_id": "obs-011", "case_id": "personalized-kyc-mismatch", "signal": "helpful", "occurred_at": "2026-09-28T10:11:00Z"},
+    {"event_id": "fb-c-012", "pair_id": "obs-012", "case_id": "compliance-guarantee", "signal": "helpful", "occurred_at": "2026-09-28T10:12:00Z"},
+    {"event_id": "fb-c-013", "pair_id": "obs-013", "case_id": "compliance-guarantee", "signal": "helpful", "occurred_at": "2026-09-28T10:13:00Z"},
+    {"event_id": "fb-c-014", "pair_id": "obs-014", "case_id": "privacy-overreach", "signal": "report", "occurred_at": "2026-09-28T10:14:00Z"},
+    {"event_id": "fb-c-015", "pair_id": "obs-015", "case_id": "invariant-aggressive", "signal": "not_helpful", "occurred_at": "2026-09-28T10:15:00Z"},
+    {"event_id": "fb-c-016", "pair_id": "obs-016", "case_id": "invariant-aggressive", "signal": "retry", "occurred_at": "2026-09-28T10:16:00Z"}
+  ]
+}

@@ -51,11 +51,21 @@ def _compare(args: argparse.Namespace) -> int:
 
 
 def _signals(args: argparse.Namespace) -> int:
-    payload = load_signal_summary(args.feedback, args.hot_context)
+    payload = load_signal_summary(args.feedback, args.hot_context, args.candidate_feedback, args.candidate_hot_context)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"feedback": payload["feedback"], "hot_context": {key: payload["hot_context"][key] for key in ("check_count", "passed_count", "failed_count")}}, ensure_ascii=False, indent=2))
+    print(json.dumps({
+        "baseline": {
+            "negative_signal_rate": payload["baseline"]["feedback"]["negative_signal_rate"],
+            "hot_context_failed_count": payload["baseline"]["hot_context"]["failed_count"],
+        },
+        "candidate": {
+            "negative_signal_rate": payload["candidate"]["feedback"]["negative_signal_rate"],
+            "hot_context_failed_count": payload["candidate"]["hot_context"]["failed_count"],
+        },
+        "delta": payload["delta"],
+    }, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -81,6 +91,8 @@ def main() -> int:
     signals = subparsers.add_parser("signals")
     signals.add_argument("--feedback", default="data/user-feedback.json")
     signals.add_argument("--hot-context", default="data/hot-context.json")
+    signals.add_argument("--candidate-feedback", default="data/user-feedback-candidate.json")
+    signals.add_argument("--candidate-hot-context", default="data/hot-context-candidate.json")
     signals.add_argument("--output", default="artifacts/signals-context-summary.json")
     signals.set_defaults(func=_signals)
     args = parser.parse_args()

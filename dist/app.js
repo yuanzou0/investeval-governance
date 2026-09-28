@@ -180,32 +180,44 @@ function renderComparison() {
 
 function renderSignals() {
   if (!state.signals) return;
-  const feedback = state.signals.feedback;
-  const hot = state.signals.hot_context;
+  const baselineFeedback = state.signals.baseline.feedback;
+  const candidateFeedback = state.signals.candidate.feedback;
+  const baselineHot = state.signals.baseline.hot_context;
+  const candidateHot = state.signals.candidate.hot_context;
+  const delta = state.signals.delta;
   const resultMap = new Map(state.results.map((result) => [result.case_id, result]));
-  $("#feedback-event-count").textContent = String(feedback.event_count);
-  $("#negative-rate").textContent = `${(feedback.negative_signal_rate * 100).toFixed(0)}%`;
-  $("#negative-count").textContent = `${feedback.negative_signal_count} 个负向信号`;
-  $("#escalated-count").textContent = String(feedback.escalated_case_count);
-  $("#hot-failed-count").textContent = String(hot.failed_count);
-  $("#hot-pass-count").textContent = `${hot.passed_count} / ${hot.check_count} 条通过`;
-  $("#feedback-case-count").textContent = `${feedback.cases.length} 条`;
-  $("#hot-check-count").textContent = `${hot.check_count} 条`;
-  $("#feedback-table-body").innerHTML = feedback.cases.map((item) => {
+  const candidateCaseMap = new Map(candidateFeedback.cases.map((item) => [item.case_id, item]));
+  const candidateHotMap = new Map(candidateHot.results.map((item) => [item.check_id, item]));
+  $("#feedback-event-count").textContent = `${baselineFeedback.event_count} / ${candidateFeedback.event_count}`;
+  $("#negative-rate").textContent = `${(baselineFeedback.negative_signal_rate * 100).toFixed(0)}% → ${(candidateFeedback.negative_signal_rate * 100).toFixed(0)}%`;
+  $("#negative-count").textContent = `${delta.negative_signal_rate_pp.toFixed(0)}pp · ${baselineFeedback.negative_signal_count} → ${candidateFeedback.negative_signal_count} 个`;
+  $("#escalated-count").textContent = `${baselineFeedback.escalated_case_count} → ${candidateFeedback.escalated_case_count}`;
+  $("#escalated-delta").textContent = `${delta.escalated_case_count} 个 · 举报或至少2个负向信号`;
+  $("#hot-failed-count").textContent = `${baselineHot.failed_count} → ${candidateHot.failed_count}`;
+  $("#hot-pass-count").textContent = `${delta.hot_context_failed_count} 个 · Candidate ${candidateHot.passed_count}/${candidateHot.check_count} 通过`;
+  $("#feedback-case-count").textContent = `${baselineFeedback.cases.length} 个案例`;
+  $("#hot-check-count").textContent = `${baselineHot.check_count} 组配对`;
+  $("#feedback-table-body").innerHTML = baselineFeedback.cases.map((item) => {
+    const candidateItem = candidateCaseMap.get(item.case_id) || { negative_signal_count: 0 };
+    const change = candidateItem.negative_signal_count - item.negative_signal_count;
     const factual = resultMap.get(item.case_id);
     const factualPass = factual?.passed ?? false;
     return `<tr>
       <td><span class="case-id">${escapeHtml(item.case_id)}</span></td>
-      <td><div class="feedback-counts"><span class="mini-signal">赞 ${item.helpful}</span><span class="mini-signal negative">踩 ${item.not_helpful}</span><span class="mini-signal negative">重问 ${item.retry}</span><span class="mini-signal negative">报 ${item.report}</span></div></td>
+      <td><span class="score ${item.negative_signal_count ? "mid" : "high"}">${item.negative_signal_count}</span></td>
+      <td><span class="score ${candidateItem.negative_signal_count ? "mid" : "high"}">${candidateItem.negative_signal_count}</span></td>
+      <td><span class="intent-delta ${change <= 0 ? "positive" : "negative"}">${change > 0 ? "+" : ""}${change}</span></td>
       <td><span class="badge ${factualPass ? "ok" : "error"}">${factualPass ? "事实通过" : "仍为 Bad Case"}</span></td>
-      <td><span class="badge ${item.escalated ? "pending" : ""}">${escapeHtml(labels[item.action] || item.action)}</span></td>
     </tr>`;
   }).join("");
-  $("#hot-context-list").innerHTML = hot.results.map((item) => `<div class="hot-row">
-    <div class="hot-row-head"><strong>${escapeHtml(item.check_id)}</strong><span class="badge ${item.passed ? "ok" : "error"}">${item.passed ? "PASS" : "FAIL"}</span></div>
-    <p>案例 ${escapeHtml(item.case_id)} · 来源相对提问 ${item.age_hours} 小时 · 上限 ${item.maximum_age_hours} 小时</p>
-    <div class="hot-findings">${item.findings.length ? item.findings.map((code) => `<span class="badge error">${escapeHtml(labels[code] || code)}</span>`).join("") : '<span class="badge ok">时间上下文一致</span>'}</div>
-  </div>`).join("");
+  $("#hot-context-list").innerHTML = baselineHot.results.map((item) => {
+    const candidateItem = candidateHotMap.get(item.check_id);
+    return `<div class="hot-row">
+    <div class="hot-row-head"><strong>${escapeHtml(item.check_id)}</strong><div class="status-flow"><span class="badge ${item.passed ? "ok" : "error"}">B ${item.passed ? "PASS" : "FAIL"}</span><span>→</span><span class="badge ${candidateItem?.passed ? "ok" : "error"}">C ${candidateItem?.passed ? "PASS" : "FAIL"}</span></div></div>
+    <p>案例 ${escapeHtml(item.case_id)} · 来源年龄 B ${item.age_hours}h → C ${candidateItem?.age_hours ?? "—"}h · 上限 ${item.maximum_age_hours}h</p>
+    <div class="hot-findings">${item.findings.length ? item.findings.map((code) => `<span class="badge error">${escapeHtml(labels[code] || code)}</span>`).join("") : '<span class="badge ok">Baseline 时间一致</span>'}</div>
+  </div>`;
+  }).join("");
 }
 
 function renderTable(items) {
@@ -296,6 +308,7 @@ function showLoadFailure(error) {
     $(selector).textContent = "载入失败";
   });
   $("#negative-count").textContent = "未取得行为数据";
+  $("#escalated-delta").textContent = "未取得行为数据";
   $("#hot-pass-count").textContent = "未取得热点数据";
   showToast(`数据载入失败：${error.message}`);
 }

@@ -23,7 +23,7 @@
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-结果：**26项通过，0项失败**。
+结果：**28项通过，0项失败**。
 
 ### 主链路
 
@@ -42,6 +42,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 | 上线决策 | HOLD原因与失败的硬门槛一致 | PASS |
 | 行为反馈 | 负向信号形成调查队列但不覆盖事实结论 | PASS |
 | 热点上下文 | 能识别过期、未来信息和事件日期错配 | PASS |
+| 行为与热点配对 | 相同16个观察槽和4个检查ID生成Baseline/Candidate差异 | PASS |
 
 ### 数据和接口异常
 
@@ -112,7 +113,7 @@ PYTHONPATH=src python3 -m investeval.cli signals
 - 生产负载、长期稳定性、灾备和浏览器兼容矩阵；
 - 真实个人信息的脱敏和数据生命周期。
 
-这些缺口属于上线前验证范围，不应被当前26项测试掩盖。
+这些缺口属于上线前验证范围，不应被当前28项测试掩盖。
 
 ## 最终测试结论
 

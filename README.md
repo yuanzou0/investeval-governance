@@ -59,7 +59,7 @@ Bad Case 分类与证据血缘
 | 人工复核 | 确认高风险、低置信度或规则冲突案例 | 不应成为所有低风险回答的必经步骤 |
 | 用户行为反馈 | 使用点赞、点踩、重问和举报等信号确定调查优先级 | 不能把受欢迎程度当成事实正确性 |
 
-当前使用16条匿名合成行为事件演示分工：举报直接进入人工复核，至少两个负向信号进入质量调查，单个弱信号仅持续观察。行为反馈不会清除事实或合规 Finding。
+当前使用 Baseline/Candidate 两个等量的16条匿名合成行为观察窗口演示分工：两侧共享相同 `pair_id` 和案例，负向信号率从75%降至25%，升级调查案例从7个降至2个。4组热点检查也使用相同 `check_id`，失败数从3降至0。该对比是合成的流程证据，不是线上满意度或因果效果；行为反馈仍不会清除事实或合规 Finding。
 
 ## 错误分类
 
@@ -95,8 +95,8 @@ Bad Case 分类与证据血缘
 - `data/cases.json`：11 条高异常密度的压力回归案例，覆盖 4 类意图；
 - `data/representative-cases.json`：32 条场景分层案例，4 类意图各 8 条；
 - `data/version-runs.json`：同一批案例的 Baseline 和 Candidate 配对结果；
-- `data/user-feedback.json`：16条匿名合成行为事件；
-- `data/hot-context.json`：4条热点时间一致性检查；
+- `data/user-feedback.json`、`data/user-feedback-candidate.json`：16组配对匿名合成行为观察；
+- `data/hot-context.json`、`data/hot-context-candidate.json`：4组配对热点时间一致性检查；
 - `fixture://`：明确表示本地合成来源，不冒充真实外部链接。
 
 数据没有真实姓名、账户、持仓、交易记录或其他个人信息。当前未连接扶摇或 iFinD MCP。未来可以通过标准数据提供者接口接入行情、财务、基金、公告和新闻数据，但接入前必须验证授权、时间戳、接口失败语义和数据许可。
@@ -193,6 +193,8 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 PYTHONPATH=src python3 -m investeval.cli signals \
   --feedback data/user-feedback.json \
   --hot-context data/hot-context.json \
+  --candidate-feedback data/user-feedback-candidate.json \
+  --candidate-hot-context data/hot-context-candidate.json \
   --output artifacts/signals-context-summary.json
 
 # 启动治理 API
@@ -218,7 +220,7 @@ python3 -m http.server 8790 --directory dist
 
 ## 测试与验证
 
-当前包含 26 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号聚合及热点时间检查。
+当前包含 28 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号 Baseline/Candidate 对比及热点时间检查。
 
 已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及私有部署成功状态检查。
 
