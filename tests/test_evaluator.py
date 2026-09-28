@@ -40,6 +40,27 @@ class EvaluationFixtureTests(unittest.TestCase):
             self.assertIn("FACT_PERSONALIZED", codes)
 
 
+class RepresentativeFixtureTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.facts = load_facts(ROOT / "data" / "facts.json")
+        cls.cases = load_cases(ROOT / "data" / "representative-cases.json")
+        cls.results = {result.case_id: result for result in evaluate_cases(cls.cases, cls.facts)}
+
+    def test_stratified_design_has_six_cases_per_intent(self) -> None:
+        counts = {intent: sum(case.intent == intent for case in self.cases) for intent in {case.intent for case in self.cases}}
+        self.assertEqual(24, len(self.cases))
+        self.assertEqual(4, len(counts))
+        self.assertEqual({6}, set(counts.values()))
+
+    def test_stratified_design_has_declared_pass_rate_and_labels(self) -> None:
+        self.assertEqual(16, sum(result.passed for result in self.results.values()))
+        for case in self.cases:
+            with self.subTest(case=case.case_id):
+                actual = {finding.code for finding in self.results[case.case_id].findings}
+                self.assertEqual(set(case.expected_error_codes), actual)
+
+
 class LoaderValidationTests(unittest.TestCase):
     def test_duplicate_fact_ids_are_rejected(self) -> None:
         payload = {"facts": [

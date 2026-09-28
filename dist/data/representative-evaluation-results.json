@@ -1,0 +1,319 @@
+{
+  "schema_version": "1.0",
+  "summary": {
+    "case_count": 24,
+    "passed_count": 16,
+    "pass_rate": 0.6667,
+    "error_code_counts": {
+      "GUARANTEED_RETURN": 1,
+      "KYC_MISMATCH": 1,
+      "MISSING_SOURCE": 2,
+      "NUMERIC_MISMATCH": 1,
+      "PERIOD_MISMATCH": 1,
+      "STALE_DATA": 1,
+      "UNSUPPORTED_CLAIM": 1
+    }
+  },
+  "results": [
+    {
+      "case_id": "rep-quote-close-01",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "rep-quote-change-02",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change"
+      ]
+    },
+    {
+      "case_id": "rep-quote-close-03",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "rep-quote-change-04",
+      "intent": "market_quote",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change"
+      ]
+    },
+    {
+      "case_id": "rep-quote-number-error-05",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "NUMERIC_MISMATCH",
+          "severity": "high",
+          "message": "Asserted value 4.2 does not match frozen value 2.04.",
+          "claim_id": "rq5",
+          "fact_id": "fact_quote_alpha_change"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_change"
+      ]
+    },
+    {
+      "case_id": "rep-quote-stale-06",
+      "intent": "market_quote",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "STALE_DATA",
+          "severity": "high",
+          "message": "Fact is 14 days old; maximum allowed age is 3.",
+          "claim_id": "rq6",
+          "fact_id": "fact_quote_alpha_close"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_quote_alpha_close"
+      ]
+    },
+    {
+      "case_id": "rep-fin-profit-01",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "rep-fin-revenue-02",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_revenue"
+      ]
+    },
+    {
+      "case_id": "rep-fin-profit-03",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "rep-fin-revenue-04",
+      "intent": "financial_analysis",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_beta_revenue"
+      ]
+    },
+    {
+      "case_id": "rep-fin-period-error-05",
+      "intent": "financial_analysis",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "PERIOD_MISMATCH",
+          "severity": "high",
+          "message": "Asserted period '2026Q1' does not match '2026H1'.",
+          "claim_id": "rf5",
+          "fact_id": "fact_beta_revenue"
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_beta_revenue"
+      ]
+    },
+    {
+      "case_id": "rep-fin-source-error-06",
+      "intent": "financial_analysis",
+      "passed": false,
+      "score": 90.0,
+      "findings": [
+        {
+          "code": "MISSING_SOURCE",
+          "severity": "medium",
+          "message": "Claim has no cited fact.",
+          "claim_id": "rf6",
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_beta_net_profit_growth"
+      ]
+    },
+    {
+      "case_id": "rep-news-summary-01",
+      "intent": "news_summary",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-summary-02",
+      "intent": "news_summary",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-summary-03",
+      "intent": "news_summary",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-summary-04",
+      "intent": "news_summary",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-source-error-05",
+      "intent": "news_summary",
+      "passed": false,
+      "score": 90.0,
+      "findings": [
+        {
+          "code": "MISSING_SOURCE",
+          "severity": "medium",
+          "message": "Claim has no cited fact.",
+          "claim_id": "rn5",
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_gamma_announcement"
+      ]
+    },
+    {
+      "case_id": "rep-news-unsupported-06",
+      "intent": "news_summary",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "UNSUPPORTED_CLAIM",
+          "severity": "high",
+          "message": "Cited fact does not exist in the selected data version.",
+          "claim_id": "rn6",
+          "fact_id": "missing_gamma_resume"
+        }
+      ],
+      "checked_fact_ids": []
+    },
+    {
+      "case_id": "rep-personalized-conservative-01",
+      "intent": "personalized_explanation",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-medium-02",
+      "intent": "personalized_explanation",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-experience-03",
+      "intent": "personalized_explanation",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-neutral-04",
+      "intent": "personalized_explanation",
+      "passed": true,
+      "score": 100.0,
+      "findings": [],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-kyc-error-05",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 75.0,
+      "findings": [
+        {
+          "code": "KYC_MISMATCH",
+          "severity": "high",
+          "message": "Recommended risk level exceeds the user's stated risk tolerance.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": [
+        "fact_fund_risk"
+      ]
+    },
+    {
+      "case_id": "rep-personalized-guarantee-06",
+      "intent": "personalized_explanation",
+      "passed": false,
+      "score": 50.0,
+      "findings": [
+        {
+          "code": "GUARANTEED_RETURN",
+          "severity": "critical",
+          "message": "Answer contains guaranteed-return language.",
+          "claim_id": null,
+          "fact_id": null
+        }
+      ],
+      "checked_fact_ids": []
+    }
+  ]
+}

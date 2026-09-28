@@ -26,7 +26,7 @@ const labels = {
   resolved: "已修复"
 };
 
-const state = { cases: [], facts: [], results: [], comparison: null, signals: null, selectedId: null, imported: [] };
+const state = { cases: [], facts: [], results: [], representative: null, comparison: null, signals: null, selectedId: null, imported: [] };
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -44,25 +44,27 @@ function saveReview(caseId, review) { localStorage.setItem(reviewKey(caseId), JS
 
 async function loadData() {
   $("#load-status").textContent = "载入中";
-  const [caseResponse, factResponse, resultResponse, comparisonResponse, signalsResponse] = await Promise.all([
+  const [caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse] = await Promise.all([
     fetch("data/cases.json", { cache: "no-store" }),
     fetch("data/facts.json", { cache: "no-store" }),
     fetch("data/evaluation-results.json", { cache: "no-store" }),
+    fetch("data/representative-evaluation-results.json", { cache: "no-store" }),
     fetch("data/version-comparison.json", { cache: "no-store" }),
     fetch("data/signals-context-summary.json", { cache: "no-store" })
   ]);
-  if (![caseResponse, factResponse, resultResponse, comparisonResponse, signalsResponse].every((response) => response.ok)) {
+  if (![caseResponse, factResponse, resultResponse, representativeResponse, comparisonResponse, signalsResponse].every((response) => response.ok)) {
     throw new Error("冻结评测数据载入失败");
   }
   state.cases = (await caseResponse.json()).cases;
   state.facts = (await factResponse.json()).facts;
   state.results = (await resultResponse.json()).results;
+  state.representative = await representativeResponse.json();
   state.comparison = await comparisonResponse.json();
   state.signals = await signalsResponse.json();
   state.selectedId = null;
   populateFilters();
   render();
-  $("#load-status").textContent = `已载入 ${state.cases.length} 条案例`;
+  $("#load-status").textContent = `24 条分层样本 · ${state.cases.length} 条压力样本`;
 }
 
 function populateFilters() {
@@ -114,8 +116,11 @@ function renderMetrics(items) {
   const pending = items.filter((item) => !item.result.passed && item.review.status === "pending").length;
   const critical = items.filter((item) => item.result.findings.some((finding) => finding.severity === "critical")).length;
   const verified = items.filter((item) => item.result.checked_fact_ids.length > 0).length;
-  $("#pass-rate").textContent = items.length ? `${Math.round(passed / items.length * 100)}%` : "—";
-  $("#pass-count").textContent = `${passed} / ${items.length} 条通过`;
+  const representative = state.representative?.summary;
+  $("#representative-pass-rate").textContent = representative ? `${(representative.pass_rate * 100).toFixed(1)}%` : "—";
+  $("#representative-pass-count").textContent = representative ? `${representative.passed_count} / ${representative.case_count} 条通过` : "—";
+  $("#pass-rate").textContent = items.length ? `${(passed / items.length * 100).toFixed(1)}%` : "—";
+  $("#pass-count").textContent = `${passed} / ${items.length} 条通过 · 标签复现 11/11`;
   $("#pending-count").textContent = String(pending);
   $("#critical-count").textContent = `${critical} 条严重合规风险`;
   $("#evidence-rate").textContent = items.length ? `${Math.round(verified / items.length * 100)}%` : "—";

@@ -15,7 +15,7 @@ AI 工具：Codex 编码助手
 |---|---|---|---|---|
 | 题目拆解 | 将题目要求拆为意图评测、事实核验、人工复核、版本治理和交付材料 | 产品范围和实施顺序 | 与题目附件逐项对照 | 已完成 |
 | 产品设计 | 设计主链路、错误分类、KYC边界和页面信息架构 | README、页面结构、错误码 | 题目覆盖矩阵和人工阅读 | 已完成 |
-| 合成数据 | 构造匿名问答案例、KYC和冻结事实 | `data/cases.json`、`data/facts.json` | Schema加载、重复ID检查、预期标签测试 | 已完成 |
+| 合成数据 | 构造匿名问答案例、KYC、冻结事实及独立场景分层集 | `data/cases.json`、`data/representative-cases.json`、`data/facts.json` | Schema加载、重复ID检查、分层结构与预期标签测试 | 已完成 |
 | 评测实现 | 生成确定性事实、时效、报告期、KYC、合规和隐私规则 | `evaluator.py` | 单元测试和可复现 CLI | 已完成 |
 | 治理后端 | 生成日志导入、筛选、详情和人工复核服务 | `governance.py`、`web_api.py` | 服务测试与真实 HTTP 调用 | 已完成 |
 | 版本治理 | 构造合成配对输入并实现证据门控 | `version-runs.json`、`rollout.py` | 配对一致性和门控原因测试 | 已完成 |
@@ -48,9 +48,11 @@ AI 工具：Codex 编码助手
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-最近一次本地结果：23 项测试通过，0 项失败。
+最近一次本地结果：25 项测试通过，0 项失败。
 
 覆盖范围包括四类意图、11条样例预期错误码、正常案例、画像事实不变性、重复事实ID、Bad Case筛选和详情、人工复核持久化、日志导入原子性、版本配对一致性、HOLD 原因、用户反馈边界，以及热点过期、未来信息泄漏和事件日期错配。
+
+新增的场景分层集包含24条合成案例，四类意图各6条，每类预设4条正常和2条异常。该设计用于均衡覆盖而非模拟真实流量，16/24的通过数由抽样方案预先决定，不能当作线上模型准确率。
 
 ### 基线评测复现
 
@@ -64,7 +66,7 @@ PYTHONPATH=src python3 -m investeval.cli evaluate \
 - 样本数：11；
 - 正常通过：2；
 - Bad Case：9；
-- 基线回答通过率：18.18%；
+- Bad Case压力集通过率：18.18%；
 - 预期错误标签复现：11/11。
 
 18.18%是故意包含大量异常的压力测试集质量，不是评测器准确率。
@@ -110,7 +112,7 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 | 合成数字被误认为真实行情 | 页面、README和JSON均标注 synthetic/fixture | 观看者仍可能忽略说明 |
 | 规则对开放语言覆盖不足 | 保存具体错误码并限制结论范围 | 隐含承诺、反讽和复杂上下文可能漏检 |
 | 小样本指标被过度解释 | 样本量设为硬门槛并输出 HOLD | 11条样例不能估计真实泛化表现 |
-| AI生成代码存在缺陷 | 23项测试、语法和HTTP检查 | 尚无独立安全审计和生产负载测试 |
+| AI生成代码存在缺陷 | 25项测试、语法和HTTP检查 | 尚无独立安全审计和生产负载测试 |
 | Candidate结果被误认为真实实验 | 标注为合成配对输入 | 尚未运行真实模型或线上流量 |
 | 自动评测替代人工合规判断 | 高风险案例进入人工复核 | 部署版还不是多用户审计系统 |
 
@@ -119,8 +121,10 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 | 证据 | 路径 |
 |---|---|
 | 匿名问答日志 | `data/cases.json` |
+| 场景分层评测集 | `data/representative-cases.json` |
 | 冻结事实数据 | `data/facts.json` |
 | 基线评测结果 | `artifacts/evaluation-results.json` |
+| 场景分层集结果 | `artifacts/representative-evaluation-results.json` |
 | 配对版本输入 | `data/version-runs.json` |
 | 版本对比与门控结果 | `artifacts/version-comparison.json` |
 | 评测测试 | `tests/test_evaluator.py` |

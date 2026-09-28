@@ -92,7 +92,8 @@ Bad Case 分类与证据血缘
 当前仓库仅包含匿名合成数据：
 
 - `data/facts.json`：6 条冻结金融事实；
-- `data/cases.json`：11 条匿名问答案例，覆盖 4 类意图；
+- `data/cases.json`：11 条高异常密度的压力回归案例，覆盖 4 类意图；
+- `data/representative-cases.json`：24 条场景分层案例，4 类意图各 6 条；
 - `data/version-runs.json`：同一批案例的 Baseline 和 Candidate 配对结果；
 - `data/user-feedback.json`：16条匿名合成行为事件；
 - `data/hot-context.json`：4条热点时间一致性检查；
@@ -100,9 +101,21 @@ Bad Case 分类与证据血缘
 
 数据没有真实姓名、账户、持仓、交易记录或其他个人信息。当前未连接扶摇或 iFinD MCP。未来可以通过标准数据提供者接口接入行情、财务、基金、公告和新闻数据，但接入前必须验证授权、时间戳、接口失败语义和数据许可。
 
+### 为什么使用两套评测集
+
+单一数据集不能同时承担“估计常规表现”和“尽量发现错误”两个目标。如果只向原来的 11 条压力集中追加容易通过的样本，虽然可以机械地提高通过率，却会改变数据分布并造成指标美化。因此，本项目冻结两套用途不同、不得混算的数据集：
+
+| 数据集 | 设计 | 用途 | 不可用于 |
+|---|---|---|---|
+| 场景分层集 `representative-synthetic-v1` | 24条；4类意图各6条；每类4条正常、2条异常 | 检查主要工作场景是否均被覆盖，提供稳定的合成基线 | 推断真实线上流量分布或生产准确率 |
+| Bad Case压力集 | 11条；刻意提高事实、KYC、合规和隐私异常密度 | 回归错误码、人工复核与证据链，比较修复是否退化 | 作为日常问答通过率的无偏估计 |
+
+场景分层集的 16/24 条通过、66.7% 通过率来自预先声明的 4:2 设计比例，不是观察真实用户流量后得到的模型性能。它的“代表性”只表示四类核心意图获得等量覆盖。未来获得合规的真实匿名分布后，应先冻结抽样协议和分层权重，再建立独立标注集；不能根据想要的通过率反向挑选案例。
+
 ## 指标解释
 
-- **基线回答通过率 18.2%**：11 条压力测试案例中有 2 条正常回答、9 条预设异常。这是被评回答集的质量，不是评测器准确率。
+- **场景分层集通过率 66.7%**：24 条中有 16 条按确定性规则通过。该数字由场景覆盖设计产生，只用于合成基线验证。
+- **Bad Case 压力集通过率 18.2%**：11 条压力测试案例中有 2 条正常回答、9 条预设异常。这是高难度回归集的质量，不是日常回答通过率，也不是评测器准确率。
 - **预期标签复现率 100%**：当前确定性规则在 11 条合成样例上复现了 11/11 条预期标签。样本量很小，不能解释为真实线上准确率。
 - **待复核 9 条**：自动评测发现的 9 条 Bad Case 初始进入人工队列，不表示已有 9 条生产事故。
 - **证据核验覆盖率**：至少检查过一条冻结事实的案例占比。
@@ -110,7 +123,7 @@ Bad Case 分类与证据血缘
 
 ## 版本对比与上线门控
 
-Baseline 和 Candidate 使用完全相同的 11 个 `case_id`，避免因样本变化产生不可比结果。
+当前 Baseline 和 Candidate 回归比较使用完全相同的 11 个压力集 `case_id`，避免因样本变化产生不可比结果。场景分层集不与这组配对结果混算；后续只有在 Baseline 和 Candidate 都对同一批 24 条样本产生冻结输出后，才能新增场景分层配对比较。
 
 | 指标 | Baseline | Candidate | 变化 |
 |---|---:|---:|---:|
@@ -163,6 +176,12 @@ PYTHONPATH=src python3 -m investeval.cli evaluate \
   --cases data/cases.json \
   --output artifacts/evaluation-results.json
 
+# 复现场景分层集结果
+PYTHONPATH=src python3 -m investeval.cli evaluate \
+  --facts data/facts.json \
+  --cases data/representative-cases.json \
+  --output artifacts/representative-evaluation-results.json
+
 # 复现版本对比和上线决策
 PYTHONPATH=src python3 -m investeval.cli compare \
   --runs data/version-runs.json \
@@ -197,9 +216,9 @@ python3 -m http.server 8790 --directory dist
 
 ## 测试与验证
 
-当前包含 23 项确定性测试，覆盖四类意图、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号聚合及热点时间检查。
+当前包含 25 项确定性测试，覆盖四类意图、场景分层结构与通过数、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号聚合及热点时间检查。
 
-已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与数据文件返回 200，以及私有部署成功状态检查。
+已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及私有部署成功状态检查。
 
 正式测试说明见 [`docs/TEST_PLAN_AND_RESULTS.md`](docs/TEST_PLAN_AND_RESULTS.md)，演示流程见 [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)，提交状态见 [`docs/SUBMISSION_CHECKLIST.md`](docs/SUBMISSION_CHECKLIST.md)。
 
@@ -220,7 +239,7 @@ python3 -m http.server 8790 --directory dist
 ## 下一步
 
 1. 增加数据或接口异常测试说明和演示材料；
-2. 扩大冻结测试集并引入独立人工标注；
+2. 使用真实匿名分布重新校准场景权重，并引入独立人工标注；
 3. 实现 `FinancialDataProvider`，在获得授权后接入扶摇或 iFinD；
 4. 将人工复核迁移到持久化多用户后端；
 5. 在满足样本量和延迟门槛后，再评估受限灰度。
