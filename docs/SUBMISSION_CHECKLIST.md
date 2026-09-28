@@ -12,8 +12,8 @@
 - [x] 用户行为反馈分工
 - [x] 热点上下文检查
 - [x] 上线门控结论
-- [ ] 提交前从目标网络重新打开在线URL
-- [ ] 用评审邮箱授予Web查看权限并用隔离会话验收
+- [x] Web 访问范围已改为公开
+- [ ] 提交前从未登录的隔离会话重新打开在线URL
 
 Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 
@@ -25,9 +25,9 @@ Web URL：<https://investeval-governance.gao44y.chatgpt.site>
 - [x] README完整
 - [x] 复现命令完整
 - [x] 创建候选人可分享的GitHub仓库
-- [x] 确认仓库当前为私有；提交前邀请评审或改为公开
+- [x] GitHub 仓库改为公开只读访问
 - [ ] 在干净环境执行README命令
-- [ ] 将评审邮箱添加为GitHub只读协作者并实测
+- [ ] 使用未登录GitHub的隔离会话实测仓库访问
 
 GitHub URL：<https://github.com/yuanzou0/investeval-governance>
 

@@ -232,21 +232,21 @@
       <div id="access-view" class="view" hidden>
         <header class="topbar">
           <div><p class="eyebrow">REVIEWER HANDOFF</p><h1>评审访问与交付</h1></div>
-          <span class="count-chip access-pending">待添加评审账号</span>
+          <span class="count-chip access-public">公开 · 无需登录</span>
         </header>
         <section class="data-boundary" aria-label="访问边界">
-          <strong>当前保持私有</strong>
-          <span>项目不会在未授权时自动公开。提交前必须将指定评审邮箱分别加入 Web 项目和 GitHub 仓库，再用无权限会话验证。</span>
+          <strong>评审零摩擦访问</strong>
+          <span>Web 产品和 GitHub 仓库以公开只读方式提交；评审无需登录、提供邮箱或接受邀请，也不获得代码写入或部署编辑权限。</span>
         </section>
         <section class="access-grid">
-          <article class="access-card"><span>WEB PRODUCT</span><h2>InvestEval</h2><p>可实际操作工作台、版本对比、反馈热点和改善闭环。</p><a href="https://investeval-governance.gao44y.chatgpt.site/" target="_blank" rel="noreferrer">打开 Web 产品</a><small>状态：私有；需显式授权评审邮箱</small></article>
-          <article class="access-card"><span>SOURCE & EVIDENCE</span><h2>GitHub 仓库</h2><p>包含源码、README、冻结数据、可追溯产物与测试说明。</p><a href="https://github.com/yuanzou0/investeval-governance" target="_blank" rel="noreferrer">打开源码仓库</a><small>状态：私有；需添加 read-only collaborator</small></article>
+          <article class="access-card"><span>WEB PRODUCT</span><h2>InvestEval</h2><p>可实际操作工作台、版本对比、反馈热点和改善闭环。</p><a href="https://investeval-governance.gao44y.chatgpt.site/" target="_blank" rel="noreferrer">打开 Web 产品</a><small>公开查看 · 无需登录</small></article>
+          <article class="access-card"><span>SOURCE & EVIDENCE</span><h2>GitHub 仓库</h2><p>包含源码、README、冻结数据、可追溯产物与测试说明。</p><a href="https://github.com/yuanzou0/investeval-governance" target="_blank" rel="noreferrer">打开源码仓库</a><small>公开只读 · 无需登录</small></article>
         </section>
         <section class="access-checklist">
-          <div class="section-heading"><div><p class="eyebrow">PRE-SUBMISSION CHECK</p><h2>评审可访问验收</h2></div><span class="badge pending">尚未完成</span></div>
+          <div class="section-heading"><div><p class="eyebrow">PRE-SUBMISSION CHECK</p><h2>评审可访问验收</h2></div><span class="badge ok">公开链接已就绪</span></div>
           <ol>
-            <li><strong>授权</strong><span>用评审方指定邮箱授予 Web 查看权限和 GitHub 只读权限。</span></li>
-            <li><strong>新会话验证</strong><span>在无现有登录态的浏览器中打开两个链接，确认不会因创建者会话而产生假阳性。</span></li>
+            <li><strong>公开查看</strong><span>Web 和 GitHub 均使用公开链接，不收集评审邮箱。</span></li>
+            <li><strong>新会话验证</strong><span>在未登录的隔离浏览器中打开两个链接，避免创建者会话造成假阳性。</span></li>
             <li><strong>功能验收</strong><span>评审账号可筛选 Bad Case、打开证据、完成复核并查看改善闭环。</span></li>
             <li><strong>失效兜底</strong><span>保留小于30MB的提交包和演示视频；链接失效时仍可复现评测结论。</span></li>
           </ol>

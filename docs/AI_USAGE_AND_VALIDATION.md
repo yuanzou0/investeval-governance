@@ -95,7 +95,7 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 
 ### 文件、接口和部署检查
 
-已经执行 JSON 语法解析、JavaScript 语法检查、HTML 解析、本地静态页面和版本数据 HTTP 200 检查、API健康与人工复核调用，以及私有站点部署成功状态检查。
+已经执行 JSON 语法解析、JavaScript 语法检查、HTML 解析、本地静态页面和版本数据 HTTP 200 检查、API健康与人工复核调用，以及公开站点的无登录访问检查。
 
 ## 人工验证状态
 
@@ -107,7 +107,7 @@ PYTHONPATH=src python3 -m investeval.cli compare \
 - 实际点击筛选、案例详情、确认与驳回流程；
 - 核对演示视频中的数字与 `artifacts/` 一致；
 - 检查公开仓库不含密钥、令牌或个人数据；
-- 决定最终仓库和站点的分享范围；
+- 提交前再次以未登录会话检查公开仓库和站点；
 - 对所有投资与合规表述作最终责任确认。
 
 ## AI 生成内容的主要风险

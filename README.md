@@ -7,7 +7,7 @@ InvestEval 是一个面向投资问答 Agent 的质量治理原型。它将匿�
 ## 在线产品
 
 - Web 产品：<https://investeval-governance.gao44y.chatgpt.site>
-- 当前访问范围：私有
+- 当前访问范围：公开，评审无需登录或接受邀请
 - 页面：质量工作台、版本对比与上线门控、反馈热点、改善闭环、评审访问
 
 ## 目标用户
@@ -158,7 +158,7 @@ Baseline/Candidate 输入位于 `data/improvement-loop.json`，执行结果、�
 
 ## 评审访问
 
-Web 产品和 GitHub 仓库当前保持私有。提交前需将评审方指定邮箱添加到两个项目，并使用新浏览器会话验证 Web 查看、仓库只读、Bad Case 筛选和证据查看。在未取得评审邮箱前，项目只声明“待授权”，不伪造“已可访问”状态。完整流程见 [`docs/REVIEWER_ACCESS.md`](docs/REVIEWER_ACCESS.md)。
+Web 产品和 GitHub 仓库均以公开只读方式提交，评审无需登录、提供邮箱或接受邀请。提交前使用未登录的隔离会话验证 Web 加载、GitHub 源码读取、Bad Case 筛选和改善闭环。公开状态不赋予评审修改仓库或编辑部署的权限。完整验收流程见 [`docs/REVIEWER_ACCESS.md`](docs/REVIEWER_ACCESS.md)。
 
 ## AI 在产品中的角色
 
@@ -250,7 +250,7 @@ python3 -m http.server 8790 --directory dist
 
 当前包含 30 项确定性测试，覆盖四类意图、32 条场景分层结构与通过数、按意图报告、回答要点覆盖与答非所问、可执行修复闭环、预期错误标签复现、事实个性化、数据来源协议、人工复核、配对一致性、上线门控、行为信号对比及热点时间检查。
 
-已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及私有部署成功状态检查。
+已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与全部运行时数据文件返回 200，以及公开部署和无登录访问检查。
 
 正式测试说明见 [`docs/TEST_PLAN_AND_RESULTS.md`](docs/TEST_PLAN_AND_RESULTS.md)，演示流程见 [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)，提交状态见 [`docs/SUBMISSION_CHECKLIST.md`](docs/SUBMISSION_CHECKLIST.md)。
 
