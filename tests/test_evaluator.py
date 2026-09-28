@@ -60,7 +60,18 @@ class LoaderValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "duplicate fact_id"):
                 load_facts(path)
 
+    def test_untrusted_fact_source_scheme_is_rejected(self) -> None:
+        payload = {"facts": [{
+            "fact_id": "unsafe", "entity_id": "X", "metric": "price", "value": 1,
+            "as_of": "2026-01-01", "source_locator": "javascript:alert(1)",
+            "source_title": "unsafe", "data_version": "v1"
+        }]}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "facts.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "source_locator"):
+                load_facts(path)
+
 
 if __name__ == "__main__":
     unittest.main()
-

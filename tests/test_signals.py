@@ -34,7 +34,11 @@ class SignalGovernanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate feedback"):
             summarize_feedback({"events": [event, event]})
 
+    def test_unsupported_feedback_signal_is_rejected(self) -> None:
+        event = {"event_id": "x", "case_id": "x", "signal": "buy_clicked", "occurred_at": "2026-09-27T10:00:00Z"}
+        with self.assertRaisesRegex(ValueError, "unsupported feedback"):
+            summarize_feedback({"events": [event]})
+
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -65,7 +65,14 @@ class GovernanceServiceTests(unittest.TestCase):
             self.service.import_cases({"cases": [duplicate]})
         self.assertEqual(before, self.cases.read_text(encoding="utf-8"))
 
+    def test_unknown_case_is_rejected(self) -> None:
+        with self.assertRaises(KeyError):
+            self.service.get_case("missing-case")
+
+    def test_unknown_review_status_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "status must be one of"):
+            self.service.review_case("quote-wrong-number", "approved_without_review", "reviewer")
+
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -197,9 +197,11 @@ python3 -m http.server 8790 --directory dist
 
 ## 测试与验证
 
-当前包含 18 项确定性测试，覆盖四类意图、预期错误标签复现、正常案例、事实个性化、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、日志导入、配对一致性、上线门控、行为信号聚合及热点时间检查。
+当前包含 23 项确定性测试，覆盖四类意图、预期错误标签复现、正常案例、事实个性化、数据来源协议、重复 ID、Bad Case筛选、证据血缘、人工复核持久化、异常状态、日志导入原子性、配对一致性、上线门控、行为信号聚合及热点时间检查。
 
 已执行的附加验证包括 JSON 语法检查、JavaScript 语法检查、HTML 解析、HTTP 页面与数据文件返回 200，以及私有部署成功状态检查。
+
+正式测试说明见 [`docs/TEST_PLAN_AND_RESULTS.md`](docs/TEST_PLAN_AND_RESULTS.md)，演示流程见 [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)，提交状态见 [`docs/SUBMISSION_CHECKLIST.md`](docs/SUBMISSION_CHECKLIST.md)。
 
 ## 已知边界和未做事项
 
