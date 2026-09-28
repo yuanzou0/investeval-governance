@@ -261,6 +261,16 @@ function showToast(message) {
   window.setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
+function showLoadFailure(error) {
+  $("#load-status").textContent = "数据载入失败，请刷新页面";
+  ["#feedback-event-count", "#negative-rate", "#escalated-count", "#hot-failed-count"].forEach((selector) => {
+    $(selector).textContent = "载入失败";
+  });
+  $("#negative-count").textContent = "未取得行为数据";
+  $("#hot-pass-count").textContent = "未取得热点数据";
+  showToast(`数据载入失败：${error.message}`);
+}
+
 document.querySelectorAll(".filters select").forEach((element) => element.addEventListener("change", render));
 document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".view").forEach((view) => { view.hidden = view.id !== button.dataset.view; });
@@ -283,4 +293,4 @@ $("#case-upload").addEventListener("change", async (event) => {
   event.target.value = "";
 });
 
-loadData().catch((error) => { $("#load-status").textContent = "载入失败"; showToast(error.message); });
+loadData().catch(showLoadFailure);
